@@ -25,36 +25,40 @@ const passThrough = (input: readonly MaterialStream[]): { outputs: readonly Mate
   outputs: input,
 });
 
+const mainStream = (input: readonly MaterialStream[], id: string): MaterialStream => {
+  const stream = input.find((candidate) => candidate.id === id);
+  if (!stream) throw new Error(`Missing required stream: ${id}`);
+  return stream;
+};
+
 const preparation: MultiStreamTransformation = (input) => passThrough(input);
 const shredding: MultiStreamTransformation = (input) => passThrough(input);
 
 const clarification: MultiStreamTransformation = (input, context) => {
-  if (input.length !== 1) throw new Error("Clarification expects one juice stream.");
-
+  const source = mainStream(input, "extracted-juice");
   const removal = requirePercent(
     getParameter(context.parameters, "solids-removal"),
     "solids-removal",
   ) / 100;
 
   const recovery = new Map(
-    input[0].components.map((component) => {
+    source.components.map((component) => {
       const removesComponent = component.id === "fiber" || component.id === "other-solids";
       return [component.id, removesComponent ? 1 - removal : 1] as const;
     }),
   );
 
   const [clarifiedJuice, removedSolids] = splitStreamByComponentRecovery(
-    input[0],
+    source,
     ["clarified-juice", "clarification-solids"],
     recovery,
   );
-  assertMassBalance(input, [clarifiedJuice, removedSolids]);
+  assertMassBalance([source], [clarifiedJuice, removedSolids]);
   return { outputs: [clarifiedJuice, removedSolids] };
 };
 
 const evaporation: MultiStreamTransformation = (input, context) => {
-  if (input.length !== 1) throw new Error("Evaporation expects one clarified juice stream.");
-
+  const source = mainStream(input, "clarified-juice");
   const removal = requirePercent(
     getParameter(context.parameters, "water-removal"),
     "water-removal",
@@ -62,66 +66,64 @@ const evaporation: MultiStreamTransformation = (input, context) => {
   const targetTemperature = getParameter(context.parameters, "target-temperature");
 
   const recovery = new Map(
-    input[0].components.map((component) => [
+    source.components.map((component) => [
       component.id,
       component.id === "water" ? 1 - removal : 1,
     ] as const),
   );
 
   const [syrup, vapor] = splitStreamByComponentRecovery(
-    { ...input[0], temperatureC: targetTemperature },
+    { ...source, temperatureC: targetTemperature },
     ["concentrated-syrup", "evaporated-water"],
     recovery,
   );
-  assertMassBalance(input, [syrup, vapor]);
+  assertMassBalance([source], [syrup, vapor]);
   return { outputs: [syrup, vapor] };
 };
 
 const crystallization: MultiStreamTransformation = (input, context) => {
-  if (input.length !== 1) throw new Error("Crystallization expects one syrup stream.");
+  const source = mainStream(input, "concentrated-syrup");
   const targetTemperature = getParameter(context.parameters, "target-temperature");
   return {
-    outputs: [{ ...input[0], id: "crystal-magma", temperatureC: targetTemperature }],
+    outputs: [{ ...source, id: "crystal-magma", temperatureC: targetTemperature }],
   };
 };
 
 const centrifugation: MultiStreamTransformation = (input, context) => {
-  if (input.length !== 1) throw new Error("Centrifugation expects one crystal-magma stream.");
-
-  const nonSugarProductRecovery = requirePercent(
+  const source = mainStream(input, "crystal-magma");
+  const motherLiquorRemoval = requirePercent(
     getParameter(context.parameters, "mother-liquor-removal"),
     "mother-liquor-removal",
   ) / 100;
+  const nonSugarProductRecovery = 1 - motherLiquorRemoval;
   const sucroseRecovery = requirePercent(
     getParameter(context.parameters, "sucrose-crystal-recovery"),
     "sucrose-crystal-recovery",
   ) / 100;
 
   const recovery = new Map(
-    input[0].components.map((component) => [
+    source.components.map((component) => [
       component.id,
       component.id === "sucrose" ? sucroseRecovery : nonSugarProductRecovery,
     ] as const),
   );
 
   const [sugarRich, motherLiquor] = splitStreamByComponentRecovery(
-    input[0],
+    source,
     ["wet-sugar", "mother-liquor"],
     recovery,
   );
-  assertMassBalance(input, [sugarRich, motherLiquor]);
+  assertMassBalance([source], [sugarRich, motherLiquor]);
   return { outputs: [sugarRich, motherLiquor] };
 };
 
 const drying: MultiStreamTransformation = (input, context) => {
-  if (input.length !== 1) throw new Error("Drying expects one wet-sugar stream.");
-
+  const stream = mainStream(input, "wet-sugar");
   const targetMoisture = requirePercent(
     getParameter(context.parameters, "target-moisture"),
     "target-moisture",
   );
   const targetTemperature = getParameter(context.parameters, "target-temperature");
-  const stream = input[0];
   const waterComponent = stream.components.find((component) => component.id === "water");
   const waterMass = waterComponent ? stream.massFlowKgPerHour * waterComponent.massFraction : 0;
   const dryMass = stream.massFlowKgPerHour - waterMass;
@@ -147,7 +149,7 @@ const drying: MultiStreamTransformation = (input, context) => {
     ["dried-sugar", "drying-vapor"],
     recovery,
   );
-  assertMassBalance(input, [driedSugar, dryingVapor]);
+  assertMassBalance([stream], [driedSugar, dryingVapor]);
   return { outputs: [driedSugar, dryingVapor] };
 };
 
