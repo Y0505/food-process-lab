@@ -12,6 +12,7 @@ function formatMass(value: number) {
 
 export default function ProcessViewport() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const activeStageIndexRef = useRef(0);
   const [activeStageIndex, setActiveStageIndex] = useState(0);
   const activeStage = visualizationModel.stages[activeStageIndex];
 
@@ -100,7 +101,15 @@ export default function ProcessViewport() {
     const animate = () => {
       frame = window.requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
+      const currentStageIndex = activeStageIndexRef.current;
       group.rotation.y = Math.sin(elapsed * 0.12) * 0.08;
+
+      equipment.forEach((body, index) => {
+        const material = body.material as THREE.MeshStandardMaterial;
+        const isActive = index === currentStageIndex;
+        material.emissive.setHex(isActive ? 0x1f5b63 : 0x000000);
+        material.emissiveIntensity = isActive ? 0.9 : 0;
+      });
 
       flowMarkers.forEach((marker, index) => {
         const stage = visualizationModel.stages[index];
@@ -132,7 +141,11 @@ export default function ProcessViewport() {
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      setActiveStageIndex((current) => (current + 1) % visualizationModel.stages.length);
+      setActiveStageIndex((current) => {
+        const next = (current + 1) % visualizationModel.stages.length;
+        activeStageIndexRef.current = next;
+        return next;
+      });
     }, 3500);
     return () => window.clearInterval(interval);
   }, []);
