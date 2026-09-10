@@ -38,12 +38,14 @@ Process logic must remain testable without a renderer.
 - Multi-component material stream model.
 - Material-stream composition validation.
 - Explicitly illustrative sugarcane feed stream.
+- Multi-stream transformation contract.
+- Mass-balance helpers.
+- Mass-balance-preserving sugarcane extraction slice.
+- Domain test suite covering composition, component mass flow, stream splitting, extraction execution, and mass balance.
 
 ### In Progress
 
-- Multi-stream transformation contract.
-- Mass-balance-preserving extraction slice.
-- Test suite for the domain layer.
+- Running and fixing the first executable domain test suite.
 
 ### Not Yet Implemented
 
@@ -91,9 +93,9 @@ Material streams support component composition so later stages can represent jui
 - [x] Process-step contract
 - [x] Deterministic transformation interface
 - [x] Basic validation contract
-- [ ] Multi-stream transformation contract
-- [ ] Mass-balance validation
-- [ ] Unit tests with an approved test runner
+- [x] Multi-stream transformation contract
+- [x] Mass-balance validation helper
+- [x] Unit tests with an approved test runner
 
 ### First Process
 
@@ -101,7 +103,7 @@ Material streams support component composition so later stages can represent jui
 - [x] Illustrative sugarcane input stream
 - [ ] Preparation transformation
 - [ ] Size reduction / shredding transformation
-- [ ] Juice extraction transformation
+- [x] Juice extraction transformation — first mass-balance-preserving slice
 - [ ] Juice clarification transformation
 - [ ] Evaporation transformation
 - [ ] Crystallization transformation
@@ -133,12 +135,12 @@ Material streams support component composition so later stages can represent jui
 - [ ] Simulation clock/timeline
 - [ ] Parameter input
 - [ ] Input/output reporting for multi-stream state
-- [ ] Mass balance validation
+- [x] Mass balance validation helper
 - [ ] Energy balance validation
 
 ### Quality
 
-- [ ] Unit/integration tests
+- [x] First domain-level test suite added
 - [ ] Accessibility review
 - [ ] Responsive UI
 - [ ] Performance review
@@ -164,6 +166,9 @@ If a reliable value is not yet established, mark it as unknown, configurable, or
 | React DOM | 19.2.8 | Web renderer | MIT | Yes | None identified in initial review | Approved |
 | Three.js | 0.186.0 | 3D rendering | MIT | Yes | None identified in initial review | Approved |
 | TypeScript | 7.0.2 | Type system/compiler | Apache-2.0 | Yes | None identified in initial review | Approved |
+| Vitest | 5.0.0 | Domain test runner | MIT | Yes | None identified in initial review | Approved |
+
+Vitest was checked against npm before addition; it is used only for development tests and does not affect user-facing application output.
 
 No additional dependency should be added without a corresponding license decision.
 
@@ -187,7 +192,7 @@ No additional dependency should be added without a corresponding license decisio
 
 ## Current Next Task
 
-Implement the multi-stream transformation contract and a small mass-balance-preserving extraction slice. Then add tests for composition validation, component mass flow, transformation execution, and balance behavior. **When this test suite is ready to run, stop and ask Yaser to test it before continuing.**
+**Testing gate:** install dependencies and run the new domain test suite. Fix any failures before continuing to the next process-engine slice. Do not advance the architecture until this gate passes.
 
 ## Change Log
 
@@ -196,5 +201,8 @@ Implement the multi-stream transformation contract and a small mass-balance-pres
 - Added multi-component material stream model.
 - Added material-stream validation.
 - Added explicitly illustrative sugarcane feed composition.
+- Added a multi-stream transformation contract.
+- Added mass-balance-preserving extraction into juice and bagasse streams.
+- Added Vitest and the first executable domain tests.
 - Kept engineering-mode claims separate from educational placeholder values.
-- Next milestone is a testable multi-stream process slice.
+- Project is now at the first executable testing gate.
