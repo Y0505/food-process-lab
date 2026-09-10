@@ -40,12 +40,15 @@ Process logic must remain testable without a renderer.
 - Explicitly illustrative sugarcane feed stream.
 - Multi-stream transformation contract.
 - Mass-balance helpers.
-- Mass-balance-preserving sugarcane extraction slice.
-- Domain test suite covering composition, component mass flow, stream splitting, extraction execution, and mass balance.
+- Previous executable domain test gate passed locally with 3 tests.
+- Component-aware stream allocation primitive with explicit per-component recovery inputs.
+- Sugarcane extraction now exposes explicit component recovery assumptions.
+- Multi-stream process runner foundation.
 
 ### In Progress
 
-- Running and fixing the first executable domain test suite.
+- Expanding multi-stream execution from extraction into the complete sugarcane process without inventing unverified engineering behavior.
+- Local verification of the newly added component-aware extraction and runner tests.
 
 ### Not Yet Implemented
 
@@ -96,6 +99,8 @@ Material streams support component composition so later stages can represent jui
 - [x] Multi-stream transformation contract
 - [x] Mass-balance validation helper
 - [x] Unit tests with an approved test runner
+- [x] Component-aware two-output allocation
+- [x] Multi-stream process runner foundation
 
 ### First Process
 
@@ -103,7 +108,7 @@ Material streams support component composition so later stages can represent jui
 - [x] Illustrative sugarcane input stream
 - [ ] Preparation transformation
 - [ ] Size reduction / shredding transformation
-- [x] Juice extraction transformation — first mass-balance-preserving slice
+- [x] Juice extraction transformation — component-aware educational slice
 - [ ] Juice clarification transformation
 - [ ] Evaporation transformation
 - [ ] Crystallization transformation
@@ -131,7 +136,7 @@ Material streams support component composition so later stages can represent jui
 ### Simulation
 
 - [x] Deterministic execution foundation
-- [ ] Multi-stream simulation state
+- [x] Multi-stream simulation state foundation
 - [ ] Simulation clock/timeline
 - [ ] Parameter input
 - [ ] Input/output reporting for multi-stream state
@@ -166,9 +171,10 @@ If a reliable value is not yet established, mark it as unknown, configurable, or
 | React DOM | 19.2.8 | Web renderer | MIT | Yes | None identified in initial review | Approved |
 | Three.js | 0.186.0 | 3D rendering | MIT | Yes | None identified in initial review | Approved |
 | TypeScript | 7.0.2 | Type system/compiler | Apache-2.0 | Yes | None identified in initial review | Approved |
-| Vitest | 5.0.0 | Domain test runner | MIT | Yes | None identified in initial review | Approved |
+| Vitest | 4.1.11 | Domain test runner | MIT | Yes | None identified in initial review | Approved |
+| Vite | 6.4.1 | Vitest integration/build support | MIT | Yes | None identified in initial review | Approved |
 
-Vitest was checked against npm before addition; it is used only for development tests and does not affect user-facing application output.
+Vitest is used only for development tests and does not affect user-facing application output. Vite is a development dependency used to support the Vitest setup; it is not the application's production bundler.
 
 No additional dependency should be added without a corresponding license decision.
 
@@ -192,17 +198,19 @@ No additional dependency should be added without a corresponding license decisio
 
 ## Current Next Task
 
-**Testing gate:** install dependencies and run the new domain test suite. Fix any failures before continuing to the next process-engine slice. Do not advance the architecture until this gate passes.
+**Verification gate:** pull the latest commits and run the expanded domain test suite. If it passes, continue with the next process-engine slice. If it fails, fix the domain issue before adding UI work.
 
 ## Change Log
 
 ### 2026-09-10
 
-- Added multi-component material stream model.
-- Added material-stream validation.
+- Added multi-component material stream model and validation.
 - Added explicitly illustrative sugarcane feed composition.
-- Added a multi-stream transformation contract.
-- Added mass-balance-preserving extraction into juice and bagasse streams.
+- Added multi-stream transformation contract and mass-balance helpers.
 - Added Vitest and the first executable domain tests.
-- Kept engineering-mode claims separate from educational placeholder values.
-- Project is now at the first executable testing gate.
+- Corrected the test setup to Vitest 4.1.11 + Vite 6.4.1 for the project's Node 20 environment.
+- Added component-aware stream allocation with explicit per-component recovery inputs.
+- Updated sugarcane extraction to use component recoveries and verify configured juice yield.
+- Added a multi-stream process runner that validates each step's streams and records simulation history.
+- Added runner tests for step-to-step stream propagation and missing transformations.
+- Previous 3-test gate passed; the expanded test set still needs local verification.
