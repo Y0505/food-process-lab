@@ -1,3 +1,4 @@
+import FactoryOverviewFrame from "@/components/factory-overview-frame";
 import ProcessLineOverview from "@/components/process-line-overview";
 import ProcessExplorer from "@/components/process-explorer";
 import ProcessExplorerStyles from "@/components/process-explorer-styles";
@@ -7,16 +8,18 @@ export default function HomePage() {
     <main>
       <ProcessExplorerStyles />
       <style dangerouslySetInnerHTML={{ __html: `
-        .process-line-overview{margin:0 0 34px;border:1px solid rgba(169,204,209,.16);border-radius:26px;background:linear-gradient(180deg,#071216 0%,#050c10 100%);overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.28)}
-        .process-line-heading{display:flex;justify-content:space-between;gap:34px;align-items:flex-end;padding:27px 28px 24px;border-bottom:1px solid rgba(181,218,223,.1);background:linear-gradient(90deg,rgba(69,150,148,.07),transparent 48%)}
-        .process-line-heading span{font-size:9px;letter-spacing:2px;color:#82c2c8;font-weight:700}.process-line-heading h2{margin:8px 0 0;font-size:27px;letter-spacing:-.7px}.process-line-heading p{max-width:470px;margin:0;color:rgba(232,240,242,.56);font-size:12px;line-height:1.75}
-        .process-line-canvas{height:470px;background:radial-gradient(circle at 50% 46%,rgba(65,146,151,.15),transparent 48%),linear-gradient(180deg,rgba(255,255,255,.01),transparent)}.process-line-canvas canvas{width:100%;height:100%;display:block}
-        .process-line-stages{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;padding:11px;border-top:1px solid rgba(181,218,223,.08);background:#071216}
-        .process-line-stage{position:relative;min-height:82px;padding:11px;border:1px solid rgba(255,255,255,.04);border-radius:11px;background:rgba(255,255,255,.018);color:#c9d9db;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease}.process-line-stage:hover{transform:translateY(-2px);border-color:rgba(116,213,193,.28);background:rgba(66,151,148,.07)}.process-line-stage.active{border-color:rgba(116,213,193,.58);background:linear-gradient(180deg,rgba(66,151,148,.16),rgba(66,151,148,.06));box-shadow:inset 0 1px 0 rgba(145,231,210,.1)}.process-line-stage.active:after{content:"";position:absolute;left:11px;right:11px;bottom:6px;height:2px;border-radius:2px;background:rgba(112,205,189,.72)}.process-line-stage strong{display:block;color:#70cdbd;font-size:9px;letter-spacing:1px}.process-line-stage span{display:block;margin:7px 0 4px;font-size:9px;font-weight:800;letter-spacing:.15px}.process-line-stage small{display:block;color:rgba(232,240,242,.4);font-size:8px;line-height:1.35}
-        .process-line-selected{display:flex;align-items:center;gap:15px;padding:15px 19px;color:rgba(232,240,242,.5);font-size:10px;border-top:1px solid rgba(181,218,223,.06)}.process-line-selected span{font-size:8px;letter-spacing:1.4px;color:#72c9c2}.process-line-selected strong{color:#dceced;letter-spacing:.4px}.process-line-selected p{margin:0;line-height:1.5}
-        @media(max-width:1050px){.process-line-stages{grid-template-columns:repeat(4,1fr)}}
-        @media(max-width:900px){.process-line-heading{align-items:flex-start;flex-direction:column}.process-line-canvas{height:410px}}
-        @media(max-width:600px){.process-line-canvas{height:330px}.process-line-stages{grid-template-columns:repeat(2,1fr)}.process-line-heading{padding:19px}.process-line-heading h2{font-size:22px}.process-line-selected{align-items:flex-start;flex-direction:column;gap:5px}}
+        .factory-frame{position:relative;margin:0 0 40px;padding:10px 10px 14px;border:1px solid rgba(169,204,209,.13);border-radius:30px;background:radial-gradient(circle at 50% 8%,rgba(74,163,157,.1),transparent 34%),linear-gradient(180deg,#061116 0%,#03090d 100%);overflow:hidden;box-shadow:0 35px 100px rgba(0,0,0,.32)}
+        .factory-frame-grid{position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(117,185,184,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(117,185,184,.08) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(180deg,#000,transparent 76%);pointer-events:none}
+        .factory-frame-glow{position:absolute;width:360px;height:360px;border-radius:50%;filter:blur(70px);opacity:.1;pointer-events:none}.factory-frame-glow-a{top:-180px;left:16%}.factory-frame-glow-b{top:30%;right:-220px}
+        .factory-frame-topline{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 16px 12px;color:rgba(221,237,239,.5);font-size:8px;letter-spacing:1.5px}
+        .factory-frame-brand{display:flex;align-items:center;gap:8px;font-weight:700}.factory-frame-dot{width:6px;height:6px;border-radius:50%;background:#70cdbd;box-shadow:0 0 12px rgba(112,205,189,.8);animation:factoryPulse 1.8s ease-in-out infinite}.factory-frame-metrics{display:flex;gap:18px}.factory-frame-metrics span{display:flex;gap:7px;align-items:baseline}.factory-frame-metrics small{font-size:7px;letter-spacing:1.1px;opacity:.55}.factory-frame-metrics strong{font-size:8px;color:#9edbd3;letter-spacing:1px}
+        .factory-frame-content{position:relative;z-index:1}.factory-frame-content .process-line-overview{margin:0;border-color:rgba(169,204,209,.1);box-shadow:none;background:rgba(4,13,17,.52)}
+        .factory-frame-legend{position:relative;z-index:2;display:flex;justify-content:flex-end;gap:18px;padding:9px 12px 0;color:rgba(220,234,236,.38);font-size:8px;letter-spacing:.6px}.factory-frame-legend span{display:flex;align-items:center;gap:6px}.factory-frame-legend i{display:inline-block;width:14px;height:3px;border-radius:3px}.legend-flow{background:#4fc09a;box-shadow:0 0 8px rgba(79,192,154,.35)}.legend-utility{background:#71898d}.legend-unit{height:7px!important;width:7px!important;border:1px solid #8ba4a7;border-radius:2px!important}
+        @keyframes factoryPulse{0%,100%{opacity:.5;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+        .process-line-heading{background:linear-gradient(90deg,rgba(69,150,148,.09),rgba(69,150,148,.02) 42%,transparent 72%)}
+        .process-line-canvas{height:500px;background:radial-gradient(circle at 50% 48%,rgba(65,146,151,.17),transparent 43%),linear-gradient(180deg,rgba(255,255,255,.015),transparent)}
+        .process-line-stage.active{box-shadow:inset 0 1px 0 rgba(145,231,210,.1),0 8px 25px rgba(52,148,137,.08)}
+        @media(max-width:760px){.factory-frame-topline{align-items:flex-start;flex-direction:column}.factory-frame-metrics{width:100%;justify-content:space-between;gap:8px}.factory-frame-legend{justify-content:flex-start;flex-wrap:wrap}.process-line-canvas{height:420px}}
       ` }} />
       <header style={{ padding: "30px 28px 20px", maxWidth: 1040, margin: "0 auto" }}>
         <p style={{ margin: 0, fontSize: 11, letterSpacing: 2.2, textTransform: "uppercase", opacity: 0.58 }}>
@@ -30,7 +33,9 @@ export default function HomePage() {
         </p>
       </header>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <ProcessLineOverview />
+        <FactoryOverviewFrame>
+          <ProcessLineOverview />
+        </FactoryOverviewFrame>
         <ProcessExplorer />
       </div>
     </main>
