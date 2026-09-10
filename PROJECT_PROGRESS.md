@@ -25,7 +25,7 @@ Process logic must remain testable without a renderer.
 
 ## Current Status
 
-**Phase:** 4 — Process visualization integration / immersive plant presentation / guided station navigation
+**Phase:** 4 — Process visualization integration / factory overview / direct equipment selection and inspection
 
 ### Completed
 
@@ -57,21 +57,20 @@ Process logic must remain testable without a renderer.
 - Added procedural labels, industrial floor/grid, shadows, fog, lighting, particles, and tone mapping for a richer learning-oriented scene.
 - Replaced deprecated `THREE.Clock` usage with `THREE.Timer`.
 - Added denser procedural equipment detail: supports, flanges, valve wheels, stems, gauges, internal shafts, coils, transfer pipe runs, and stage-specific subassemblies.
-- Added clickable equipment/stage selection from the viewport and stage strip.
-- Added process-stage controls, process legend, and visible station parameters.
-- Added differentiated animated material particles in process lanes.
-- Added a complete production-line overview that presents all eight units as one connected factory path.
+- Added direct clickable equipment hit areas in the factory viewport.
+- Added a persistent selected-equipment information panel containing stage, role, description, input and output streams.
+- Added a visible floor selection marker so the selected station is obvious in the 3D overview.
+- Added `View details` as the primary transition from a selected factory unit to its internal educational inspection.
+- Kept the complete production line visible as the primary overview instead of making camera-tour navigation the primary interaction.
 - Added an original equipment inspection experience with stage-specific internal procedural views and educational observation/output panels.
 - Added an immersive factory-overview frame with industrial grid, ambient glow, live-model HUD, process metrics, and visual legend around the production line.
-- Added a guided factory tour control that steps through the eight process stations automatically.
-- Added smooth in-scene camera travel so selecting a station changes the viewpoint inside the existing Three.js scene instead of rebuilding the scene.
 
 ### In Progress
 
-- Manual browser verification of the immersive plant presentation, guided tour, and station interaction.
-- Build a spatial cutaway path from the selected plant unit into the existing internal equipment inspection experience.
+- Manual browser verification of direct equipment selection, selected-equipment information, and View Details → internal inspection → Back to plant flow.
 - Improve equipment-specific material-flow behavior after visual review.
 - Review simplified educational assumptions before presenting them as UI data.
+- Improve the visual transition between plant overview and equipment inspection without making the overview camera the primary interaction.
 
 ### Not Yet Implemented
 
@@ -152,13 +151,12 @@ Material streams support component composition so later stages can represent jui
 - [x] Live process-state overlay
 - [x] Procedural visual polish (lighting, shadows, grid, fog, particles, labels)
 - [x] Dense stage-specific procedural equipment detail
-- [x] Equipment/stage selection
+- [x] Direct equipment selection
+- [x] Selected-equipment information panel
 - [x] Visible stage parameters
 - [x] Process legend / interaction guidance
 - [x] Complete production-line overview
 - [x] Immersive factory presentation frame
-- [x] Guided factory tour
-- [x] Smooth camera focus/travel
 - [ ] Equipment-specific flow visualization refinement
 - [ ] Simulation state timeline visualization
 
@@ -167,6 +165,8 @@ Material streams support component composition so later stages can represent jui
 - [x] Identify the eight process units for inspection
 - [x] Original internal procedural representations
 - [x] Dedicated equipment inspection interaction
+- [x] View Details transition from selected factory unit
+- [ ] Smooth visual transition into inspection
 - [ ] Cutaway integrated into main plant camera experience
 - [ ] Educational component highlighting inside equipment
 
