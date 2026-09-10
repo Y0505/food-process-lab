@@ -1,4 +1,4 @@
-import ProcessViewport from "@/components/process-viewport";
+import ProcessExplorer from "@/components/process-explorer";
 
 export default function HomePage() {
   return (
@@ -11,12 +11,11 @@ export default function HomePage() {
           Sugarcane → Sugar
         </h1>
         <p style={{ margin: 0, maxWidth: 760, lineHeight: 1.65, opacity: 0.68, fontSize: 15 }}>
-          Explore a deterministic food-processing simulation through an original procedural 3D environment.
-          Equipment, material flow and stage state are generated from the same process model.
+          Explore the process as an engineer: select a unit, enter the equipment, and inspect the mechanism and material transformation inside.
         </p>
       </header>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <ProcessViewport />
+        <ProcessExplorer />
       </div>
     </main>
   );
