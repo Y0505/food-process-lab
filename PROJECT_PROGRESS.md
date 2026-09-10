@@ -49,7 +49,8 @@ Process logic must remain testable without a renderer.
 
 ### In Progress
 
-- Local verification of the complete sugarcane multi-stream process.
+- Fix verification issue where derived multi-stream moisture was inherited from the original feed instead of the output component composition.
+- Local verification of the complete sugarcane multi-stream process after the fix.
 - Review of the simplified educational assumptions before connecting the process state to the 3D visualization.
 
 ### Not Yet Implemented
@@ -201,7 +202,7 @@ No additional dependency should be added without a corresponding license decisio
 
 ## Current Next Task
 
-**Verification gate:** pull the latest commits and run `npm test`. If the complete sugarcane multi-stream tests pass, the next slice is to connect the resulting process state to the existing Three.js equipment/flow visualization. If it fails, fix the domain issue before adding UI work.
+**Verification gate:** pull the latest fix and run `npm test`. The reported failure was caused by `moisturePercent` remaining inherited from the original feed on component-derived output streams; the stream builder now derives moisture from the output water component mass fraction. If all tests pass, the next slice is to connect the resulting process state to the existing Three.js equipment/flow visualization. If it fails, fix the domain issue before adding UI work.
 
 ## Change Log
 
@@ -216,5 +217,6 @@ No additional dependency should be added without a corresponding license decisio
 - Updated sugarcane extraction to use component recoveries and verify configured juice yield.
 - Added a multi-stream process runner that validates each step's streams and records simulation history.
 - Added runner tests for step-to-step stream propagation and missing transformations.
-- Added end-to-end sugarcane multi-stream transformations for clarification, evaporation, crystallization state, centrifugation, and drying.
+- Added end-to-end sugarcane multi-stream transformations for clarification, evaporation, crystallization, centrifugation, and drying.
 - Added complete-process tests and stage mass-balance checks.
+- Fixed component-derived stream moisture so it is calculated from the output water mass fraction rather than inherited from the original input stream.
