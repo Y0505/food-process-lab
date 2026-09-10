@@ -44,7 +44,7 @@ UI
 
 ## Current Status
 
-**Phase:** 1 — Application Skeleton
+**Phase:** 1 — Application Skeleton / Process Vertical Slice
 
 ### Completed
 
@@ -53,19 +53,25 @@ UI
 - Process-first concept established.
 - Originality/copyright policy established.
 - Dependency policy established.
-- README added to the repository.
+- README added.
 - Project coordination/progress file added.
+- Next.js application shell added.
+- TypeScript configuration added.
+- Three.js viewport added without a 3D framework wrapper.
+- Initial process-domain contracts added.
+- Initial sugarcane-to-sugar process definition added.
+- Process definition is used as the source for the initial 3D equipment units.
+- Core dependencies were license-reviewed: Next.js MIT, React MIT, Three.js MIT, TypeScript Apache-2.0. No visible attribution requirement was identified for normal application use in this initial review.
 
 ### In Progress
 
-- Minimal Next.js + TypeScript application foundation.
-- Minimal Three.js integration.
-- Initial process-domain types.
+- Strengthening the process-domain model.
+- Making material transformations executable and testable.
+- Replacing placeholder visual units with process-specific original equipment representations.
 
 ### Not Yet Implemented
 
-- Complete sugarcane process model.
-- Equipment visualization beyond the initial proof of architecture.
+- Complete engineering parameter dataset.
 - Internal/cutaway inspection.
 - Simulation timeline and deterministic execution.
 - Engineering validation and balances.
@@ -89,7 +95,7 @@ Core concepts:
 - `Transformation`
 - `ProcessConnection`
 
-A conceptual process step should be able to describe its input stream, output stream, equipment, relevant parameters, and deterministic transformation without depending on Three.js.
+A process step must be able to describe its input stream, output stream, equipment, relevant parameters, and deterministic transformation without depending on Three.js.
 
 ## Development Checklist
 
@@ -98,35 +104,36 @@ A conceptual process step should be able to describe its input stream, output st
 - [x] README
 - [x] Project progress / agent coordination
 - [x] Dependency policy
-- [ ] Application scaffold
+- [x] Application scaffold
 
 ### Process Engine
 
-- [ ] Domain types
-- [ ] Material state
-- [ ] Process-step contract
-- [ ] Deterministic transformation interface
+- [x] Domain types
+- [x] Material state
+- [x] Process-step contract
+- [x] Deterministic transformation interface
 - [ ] Validation contract
 - [ ] Unit tests
 
 ### First Process
 
 - [ ] Sugarcane input
-- [ ] Preparation
-- [ ] Size reduction / shredding
-- [ ] Juice extraction
-- [ ] Juice clarification
-- [ ] Evaporation
-- [ ] Crystallization
-- [ ] Centrifugation
-- [ ] Drying
+- [x] Process-stage skeleton
+- [ ] Preparation transformation
+- [ ] Size reduction / shredding transformation
+- [ ] Juice extraction transformation
+- [ ] Juice clarification transformation
+- [ ] Evaporation transformation
+- [ ] Crystallization transformation
+- [ ] Centrifugation transformation
+- [ ] Drying transformation
 - [ ] Sugar output
 
 ### Visualization
 
-- [ ] Original 3D scene
-- [ ] Original equipment primitives/models
-- [ ] Connect equipment to process data
+- [x] Original 3D scene
+- [x] Original primitive equipment representations
+- [x] Connect equipment to process data
 - [ ] Equipment selection
 - [ ] Material-flow visualization
 - [ ] Parameter display
@@ -158,13 +165,7 @@ A conceptual process step should be able to describe its input stream, output st
 
 ## Research Policy
 
-Technical research may be used to understand:
-
-- food-processing terminology;
-- process stages;
-- engineering equations and relationships;
-- standards and safety concepts;
-- realistic parameter ranges.
+Technical research may be used to understand food-processing terminology, process stages, engineering equations and relationships, standards, safety concepts, and realistic parameter ranges.
 
 Research must not be used as a source for copying implementation, distinctive interface design, assets, or product-specific workflows.
 
@@ -184,11 +185,13 @@ If a reliable value is not yet established, mark it as unknown, configurable, or
 
 | Dependency | Version | Purpose | License | Free? | Visible attribution required? | Decision |
 |---|---|---|---|---|---|---|
-| Next.js | TBD | Application framework | TBD | TBD | TBD | Pending verification |
-| TypeScript | TBD | Type system/compiler | TBD | TBD | TBD | Pending verification |
-| Three.js | TBD | 3D rendering | TBD | TBD | TBD | Pending verification |
+| Next.js | 16.3.4 | Application framework | MIT | Yes | None identified in initial review | Approved |
+| React | 19.2.8 | UI runtime | MIT | Yes | None identified in initial review | Approved |
+| React DOM | 19.2.8 | Web renderer | MIT | Yes | None identified in initial review | Approved |
+| Three.js | 0.186.0 | 3D rendering | MIT | Yes | None identified in initial review | Approved |
+| TypeScript | 7.0.2 | Type system/compiler | Apache-2.0 | Yes | None identified in initial review | Approved |
 
-No dependency should be added until its current license and attribution requirements have been checked.
+No additional dependency should be added without a corresponding license decision.
 
 ## Agent Handoff Protocol
 
@@ -210,12 +213,17 @@ No dependency should be added until its current license and attribution requirem
 
 ## Current Next Task
 
-Build the minimal application foundation and establish the process-domain types before creating detailed 3D assets. The first implementation must prove the architecture with a small vertical slice rather than attempting the entire factory at once.
+Implement executable material transformations and validation for the first vertical slice, beginning with a deliberately small and traceable material state. Do not add invented engineering values merely to make the demo look more realistic.
 
 ## Change Log
 
 ### 2026-09-10
 
 - Repository write access confirmed.
-- Added initial README and project coordination document.
-- Ready to begin implementation of the application foundation.
+- Added README and project coordination document.
+- Added minimal Next.js + TypeScript foundation.
+- Added direct Three.js integration.
+- Added process-domain contracts.
+- Added initial sugarcane process definition.
+- Connected process data to the initial 3D scene.
+- Verified current core package versions and licenses before updating the dependency manifest.
