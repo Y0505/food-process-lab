@@ -1,5 +1,4 @@
 import FactoryOverviewFrame from "@/components/factory-overview-frame";
-import FactoryTourControls from "@/components/factory-tour-controls";
 import ProcessLineOverview from "@/components/process-line-overview";
 import ProcessExplorer from "@/components/process-explorer";
 import ProcessExplorerStyles from "@/components/process-explorer-styles";
@@ -16,29 +15,28 @@ export default function HomePage() {
         .factory-frame-brand{display:flex;align-items:center;gap:8px;font-weight:700}.factory-frame-dot{width:6px;height:6px;border-radius:50%;background:#70cdbd;box-shadow:0 0 12px rgba(112,205,189,.8);animation:factoryPulse 1.8s ease-in-out infinite}.factory-frame-metrics{display:flex;gap:18px}.factory-frame-metrics span{display:flex;gap:7px;align-items:baseline}.factory-frame-metrics small{font-size:7px;letter-spacing:1.1px;opacity:.55}.factory-frame-metrics strong{font-size:8px;color:#9edbd3;letter-spacing:1px}
         .factory-frame-content{position:relative;z-index:1}.factory-frame-content .process-line-overview{margin:0;border-color:rgba(169,204,209,.1);box-shadow:none;background:rgba(4,13,17,.52)}
         .factory-frame-legend{position:relative;z-index:2;display:flex;justify-content:flex-end;gap:18px;padding:9px 12px 0;color:rgba(220,234,236,.38);font-size:8px;letter-spacing:.6px}.factory-frame-legend span{display:flex;align-items:center;gap:6px}.factory-frame-legend i{display:inline-block;width:14px;height:3px;border-radius:3px}.legend-flow{background:#4fc09a;box-shadow:0 0 8px rgba(79,192,154,.35)}.legend-utility{background:#71898d}.legend-unit{height:7px!important;width:7px!important;border:1px solid #8ba4a7;border-radius:2px!important}
-        .factory-tour-controls{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:18px;margin:12px 12px 2px;padding:13px 15px;border:1px solid rgba(112,205,189,.12);border-radius:14px;background:linear-gradient(90deg,rgba(58,124,124,.09),rgba(255,255,255,.018));backdrop-filter:blur(8px)}
-        .factory-tour-copy{display:flex;flex-direction:column;gap:4px}.factory-tour-copy span{font-size:7px;letter-spacing:1.6px;color:#70cdbd;font-weight:800}.factory-tour-copy strong{font-size:11px;color:rgba(231,241,242,.72);font-weight:600}.factory-tour-controls button{border:1px solid rgba(112,205,189,.3);border-radius:8px;padding:8px 12px;background:rgba(65,145,139,.1);color:#9cddd4;font:700 8px/1 inherit;letter-spacing:1.1px;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease}.factory-tour-controls button:hover{transform:translateY(-1px);background:rgba(65,145,139,.18);border-color:rgba(112,205,189,.55)}
-        @keyframes factoryPulse{0%,100%{opacity:.5;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
         .process-line-heading{background:linear-gradient(90deg,rgba(69,150,148,.09),rgba(69,150,148,.02) 42%,transparent 72%)}
-        .process-line-canvas{height:500px;background:radial-gradient(circle at 50% 48%,rgba(65,146,151,.17),transparent 43%),linear-gradient(180deg,rgba(255,255,255,.015),transparent)}
+        .process-line-overview{position:relative}
+        .process-line-canvas{height:500px;background:radial-gradient(circle at 50% 48%,rgba(65,146,151,.17),transparent 43%),linear-gradient(180deg,rgba(255,255,255,.015),transparent);cursor:default}
+        .process-line-canvas canvas{display:block;width:100%;height:100%}
         .process-line-stage.active{box-shadow:inset 0 1px 0 rgba(145,231,210,.1),0 8px 25px rgba(52,148,137,.08)}
-        @media(max-width:760px){.factory-frame-topline{align-items:flex-start;flex-direction:column}.factory-frame-metrics{width:100%;justify-content:space-between;gap:8px}.factory-frame-legend{justify-content:flex-start;flex-wrap:wrap}.process-line-canvas{height:420px}.factory-tour-controls{align-items:flex-start;flex-direction:column}.factory-tour-controls button{width:100%}}
+        .process-line-selected{position:absolute;left:28px;right:28px;bottom:82px;z-index:5;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:end;gap:22px;padding:17px 19px;border:1px solid rgba(116,213,193,.28);border-radius:15px;background:rgba(4,14,18,.88);box-shadow:0 16px 45px rgba(0,0,0,.32);backdrop-filter:blur(12px);pointer-events:auto}
+        .process-line-selected>div:first-child{min-width:0}.process-line-selected>div:first-child>span{display:block;color:#70cdbd;font-size:8px;font-weight:800;letter-spacing:1.4px}.process-line-selected>div:first-child>strong{display:block;margin-top:5px;color:rgba(224,240,241,.42);font-size:8px;letter-spacing:1px}.process-line-selected h3{margin:2px 0 4px;font-size:18px}.process-line-selected p{margin:0;color:rgba(232,240,242,.58);font-size:11px;line-height:1.45;max-width:580px}
+        .selected-flow{display:flex;flex-direction:column;gap:6px;min-width:175px}.selected-flow span{font-size:8px;letter-spacing:.6px;color:rgba(218,234,235,.5)}
+        .process-line-selected .enter-equipment{white-space:nowrap;border:1px solid rgba(116,213,193,.55);border-radius:10px;background:#123b3b;color:#eafffa;padding:11px 16px;cursor:pointer;font-weight:700}.process-line-selected .enter-equipment:hover{background:#17504e}
+        @keyframes factoryPulse{0%,100%{opacity:.5;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+        @media(max-width:900px){.process-line-selected{left:18px;right:18px;bottom:76px;grid-template-columns:1fr auto;gap:12px}.selected-flow{display:none}.process-line-selected p{max-width:none}}
+        @media(max-width:760px){.factory-frame-topline{align-items:flex-start;flex-direction:column}.factory-frame-metrics{width:100%;justify-content:space-between;gap:8px}.factory-frame-legend{justify-content:flex-start;flex-wrap:wrap}.process-line-canvas{height:420px}}
+        @media(max-width:600px){.process-line-selected{left:10px;right:10px;bottom:68px;grid-template-columns:1fr}.process-line-selected .enter-equipment{justify-self:start}.process-line-selected h3{font-size:16px}}
       ` }} />
       <header style={{ padding: "30px 28px 20px", maxWidth: 1040, margin: "0 auto" }}>
-        <p style={{ margin: 0, fontSize: 11, letterSpacing: 2.2, textTransform: "uppercase", opacity: 0.58 }}>
-          FoodProcessLab · Interactive Process Lab
-        </p>
-        <h1 style={{ margin: "10px 0 8px", fontSize: "clamp(32px, 5vw, 52px)", letterSpacing: -1.8 }}>
-          Sugarcane → Sugar
-        </h1>
-        <p style={{ margin: 0, maxWidth: 760, lineHeight: 1.65, opacity: 0.68, fontSize: 15 }}>
-          Start with the complete factory, follow the material path, then travel into an individual unit to understand the transformation happening inside.
-        </p>
+        <p style={{ margin: 0, fontSize: 11, letterSpacing: 2.2, textTransform: "uppercase", opacity: 0.58 }}>FoodProcessLab · Interactive Process Lab</p>
+        <h1 style={{ margin: "10px 0 8px", fontSize: "clamp(32px, 5vw, 52px)", letterSpacing: -1.8 }}>Sugarcane → Sugar</h1>
+        <p style={{ margin: 0, maxWidth: 760, lineHeight: 1.65, opacity: 0.68, fontSize: 15 }}>Start with the complete factory, select a unit, understand its role, then travel inside that unit to see the transformation.</p>
       </header>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <FactoryOverviewFrame>
           <ProcessLineOverview />
-          <FactoryTourControls />
         </FactoryOverviewFrame>
         <ProcessExplorer />
       </div>
