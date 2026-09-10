@@ -68,17 +68,14 @@ function buildLine(animated: THREE.Object3D[]) {
   const xs = stages.map((_, i) => -8.4 + i * 2.4);
   const y = -0.05;
 
-  // Factory floor, safety lanes and equipment foundations.
   box(root, [20.5, 0.18, 4.8], [0, -1.3, 0], dark);
   for (let i = 0; i < 9; i++) box(root, [1.7, 0.025, 0.035], [-9.5 + i * 2.4, -1.19, -1.72], material(0xb8a65c, 0.05, 0.65));
   for (const x of xs) box(root, [1.75, 0.12, 1.95], [x, -1.19, 0], steelDark);
 
-  // Overhead utility rack gives the line a real spatial hierarchy.
   box(root, [20, 0.12, 0.12], [0, 3.0, -0.85], steelDark);
   box(root, [20, 0.08, 0.08], [0, 2.78, -0.85], steel);
   for (const x of xs) box(root, [0.08, 4.25, 0.08], [x, 0.85, -0.85], steelDark);
 
-  // Main process spine: the material visibly travels from unit to unit.
   for (let i = 0; i < xs.length - 1; i++) {
     pipe(root, new THREE.Vector3(xs[i] + 0.72, y, 0), new THREE.Vector3(xs[i + 1] - 0.72, y, 0), 0x4fc09a, 0.075);
     for (let p = 0; p < 3; p++) {
@@ -89,7 +86,6 @@ function buildLine(animated: THREE.Object3D[]) {
     }
   }
 
-  // 01 Preparation: receiving table, rollers, feed hopper.
   {
     const x = xs[0];
     supportFrame(root, x, 1.55, 1.35, steel);
@@ -107,7 +103,6 @@ function buildLine(animated: THREE.Object3D[]) {
     }
   }
 
-  // 02 Shredding: enclosed drum, drive motor and discharge chute.
   {
     const x = xs[1];
     supportFrame(root, x, 1.5, 2.1, steel);
@@ -127,7 +122,6 @@ function buildLine(animated: THREE.Object3D[]) {
     animated.push(motor);
   }
 
-  // 03 Extraction: paired rollers and visible juice collection.
   {
     const x = xs[2];
     supportFrame(root, x, 1.65, 2.0, steel);
@@ -146,7 +140,6 @@ function buildLine(animated: THREE.Object3D[]) {
     }
   }
 
-  // 04 Clarification: tall vessel, feed/outlet pipes and settling zone.
   {
     const x = xs[3];
     supportFrame(root, x, 1.5, 2.75, steel);
@@ -163,7 +156,6 @@ function buildLine(animated: THREE.Object3D[]) {
     }
   }
 
-  // 05 Evaporation: three vessels, heating jackets and vapor plume.
   {
     const x = xs[4];
     for (let i = -1; i <= 1; i++) {
@@ -187,7 +179,6 @@ function buildLine(animated: THREE.Object3D[]) {
     }
   }
 
-  // 06 Crystallization: jacketed vessel, agitator and visible crystal population.
   {
     const x = xs[5];
     const tank = cylinder(root, 0.74, 2.1, [x, 0.15, 0], steel, 32);
@@ -208,7 +199,6 @@ function buildLine(animated: THREE.Object3D[]) {
     }
   }
 
-  // 07 Centrifugation: basket, motor housing and liquid discharge.
   {
     const x = xs[6];
     const basket = cylinder(root, 0.78, 1.35, [x, 0.2, 0], steel, 38);
@@ -227,7 +217,6 @@ function buildLine(animated: THREE.Object3D[]) {
     pipe(root, new THREE.Vector3(x + 0.75, 0.15, 0), new THREE.Vector3(x + 1.25, -0.55, 0), 0x65c89b, 0.065);
   }
 
-  // 08 Drying: chamber, air path and finished sugar discharge.
   {
     const x = xs[7];
     box(root, [1.55, 2.15, 1.5], [x, 0.12, 0], dark);
@@ -245,8 +234,17 @@ function buildLine(animated: THREE.Object3D[]) {
   return root;
 }
 
+function getCameraPose(index: number) {
+  const targetX = -8.4 + index * 2.4;
+  return {
+    position: new THREE.Vector3(targetX * 0.42, 3.5 + (index % 2) * 0.16, 17.2 - (index === 7 ? 0.6 : 0)),
+    target: new THREE.Vector3(targetX * 0.38, 0.1 + (index === 3 ? 0.18 : 0), 0),
+  };
+}
+
 export default function ProcessLineOverview() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const selectedRef = useRef(0);
   const [selected, setSelected] = useState(0);
 
   useEffect(() => {
@@ -282,9 +280,24 @@ export default function ProcessLineOverview() {
     const line = buildLine(flow);
     scene.add(line);
 
-    const targetX = -8.4 + selected * 2.4;
-    camera.position.set(targetX * 0.42, 3.5, 17.2);
-    camera.lookAt(targetX * 0.38, 0.1, 0);
+    const initialPose = getCameraPose(0);
+    camera.position.copy(initialPose.position);
+    camera.lookAt(initialPose.target);
+
+    const cameraPositionGoal = initialPose.position.clone();
+    const cameraTargetGoal = initialPose.target.clone();
+    const cameraTargetCurrent = initialPose.target.clone();
+
+    const onStageSelect = (event: Event) => {
+      const customEvent = event as CustomEvent<number>;
+      const index = Math.max(0, Math.min(stages.length - 1, Number(customEvent.detail)));
+      selectedRef.current = index;
+      const pose = getCameraPose(index);
+      cameraPositionGoal.copy(pose.position);
+      cameraTargetGoal.copy(pose.target);
+    };
+
+    window.addEventListener("food-process-stage-select", onStageSelect);
 
     const onResize = () => {
       camera.aspect = mount.clientWidth / Math.max(1, mount.clientHeight);
@@ -300,24 +313,34 @@ export default function ProcessLineOverview() {
       frame = requestAnimationFrame(animate);
       timer.update();
       const t = timer.getElapsed();
+
       line.rotation.y = Math.sin(t * 0.12) * 0.035;
       flow.forEach((object, index) => {
         if (index % 7 === 0) object.rotation.y += 0.014;
         if (index % 11 === 0) object.position.y += Math.sin(t * 1.8 + index) * 0.0012;
       });
+
+      const positionBlend = 1 - Math.pow(0.001, timer.getDelta() * 1.35);
+      const targetBlend = 1 - Math.pow(0.001, timer.getDelta() * 1.65);
+      camera.position.lerp(cameraPositionGoal, positionBlend);
+      cameraTargetCurrent.lerp(cameraTargetGoal, targetBlend);
+      camera.lookAt(cameraTargetCurrent);
+
       renderer.render(scene, camera);
     };
     animate();
 
     return () => {
       cancelAnimationFrame(frame);
+      window.removeEventListener("food-process-stage-select", onStageSelect);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };
-  }, [selected]);
+  }, []);
 
   const selectStage = (index: number) => {
+    selectedRef.current = index;
     setSelected(index);
     window.dispatchEvent(new CustomEvent("food-process-stage-select", { detail: index }));
   };
