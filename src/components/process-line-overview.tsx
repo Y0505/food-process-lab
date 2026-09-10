@@ -14,229 +14,240 @@ type Animated = {
   stage: number;
   phase: number;
   speed: number;
-  base?: THREE.Vector3;
 };
 
-const material = (color: number, metalness = 0.45, roughness = 0.42) =>
+const mat = (color: number, metalness = 0.25, roughness = 0.5) =>
   new THREE.MeshStandardMaterial({ color, metalness, roughness });
+const glass = (color: number, opacity = 0.16) =>
+  new THREE.MeshPhysicalMaterial({ color, transparent: true, opacity, roughness: 0.12, transmission: 0.15, depthWrite: false });
 
-function box(g: THREE.Group, size: [number, number, number], p: [number, number, number], m: THREE.Material) {
+function addBox(g: THREE.Group, size: [number, number, number], p: [number, number, number], m: THREE.Material) {
   const o = new THREE.Mesh(new THREE.BoxGeometry(...size), m);
   o.position.set(...p); o.castShadow = o.receiveShadow = true; g.add(o); return o;
 }
-
-function cyl(g: THREE.Group, radius: number, height: number, p: [number, number, number], m: THREE.Material, segments = 24) {
-  const o = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, segments), m);
+function addCylinder(g: THREE.Group, r: number, h: number, p: [number, number, number], m: THREE.Material, segments = 24) {
+  const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, segments), m);
   o.position.set(...p); o.castShadow = o.receiveShadow = true; g.add(o); return o;
 }
-
-function pipe(g: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, m: THREE.Material, radius = 0.055) {
+function addPipe(g: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, m: THREE.Material, radius = 0.055) {
   const d = b.clone().sub(a);
   const o = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, d.length(), 12), m);
   o.position.copy(a).add(b).multiplyScalar(0.5);
   o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
   o.castShadow = true; g.add(o); return o;
 }
-
-function torus(g: THREE.Group, r: number, tube: number, p: [number, number, number], m: THREE.Material) {
-  const o = new THREE.Mesh(new THREE.TorusGeometry(r, tube, 10, 32), m);
-  o.position.set(...p); o.rotation.x = Math.PI / 2; o.castShadow = true; g.add(o); return o;
-}
-
-function addFlow(animated: Animated[], g: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, stage: number, m: THREE.Material, count = 9, speed = 0.18) {
-  const d = b.clone().sub(a);
+function addFlow(animated: Animated[], g: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, stage: number, m: THREE.Material, count = 8, speed = 0.2) {
   for (let i = 0; i < count; i++) {
-    const o = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), m);
-    g.add(o);
-    animated.push({ object: o, kind: "pipe-flow", stage, phase: i / count, speed, base: d.clone() });
-    o.userData.flowA = a.clone(); o.userData.flowB = b.clone();
+    const o = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), m);
+    o.userData.a = a.clone(); o.userData.b = b.clone(); g.add(o);
+    animated.push({ object: o, kind: "flow", stage, phase: i / count, speed });
   }
+}
+function addGrain(g: THREE.Group, p: [number, number, number], m: THREE.Material, size = 0.045) {
+  const o = new THREE.Mesh(new THREE.OctahedronGeometry(size), m); o.position.set(...p); g.add(o); return o;
 }
 
 function buildFactory(animated: Animated[]) {
   const g = new THREE.Group();
-  const steel = material(0x788b8e, 0.88, 0.25);
-  const steelDark = material(0x34474b, 0.86, 0.29);
-  const rubber = material(0x151b1d, 0.35, 0.7);
-  const copper = material(0x9a704b, 0.72, 0.3);
-  const cane = material(0x9f8050, 0.05, 0.86);
-  const sugar = material(0xf0d994, 0.04, 0.28);
-  const juice = new THREE.MeshStandardMaterial({ color: 0x5a9d69, roughness: 0.24, metalness: 0.02, transparent: true, opacity: 0.82 });
-  const vapor = new THREE.MeshStandardMaterial({ color: 0xdcefed, roughness: 0.1, transparent: true, opacity: 0.18 });
-  const hot = new THREE.MeshStandardMaterial({ color: 0xd17b36, emissive: 0x5d210c, emissiveIntensity: 0.65, transparent: true, opacity: 0.5 });
-  const processPipe = material(0x50756f, 0.8, 0.26);
+  const steel = mat(0x77898a, 0.8, 0.28);
+  const darkSteel = mat(0x273a3d, 0.82, 0.3);
+  const frame = mat(0x405457, 0.72, 0.34);
+  const copper = mat(0xb07a45, 0.68, 0.3);
+  const cane = mat(0x9c8651, 0.05, 0.82);
+  const caneFresh = mat(0xb3a05b, 0.03, 0.78);
+  const fiber = mat(0x8c7446, 0.02, 0.9);
+  const sugar = mat(0xf4e4a8, 0.02, 0.25);
+  const juice = mat(0x4e9a62, 0.03, 0.3);
+  const syrup = mat(0x7f5a31, 0.03, 0.34);
+  const molasses = mat(0x3a251b, 0.02, 0.46);
+  const hot = mat(0xe28b42, 0.05, 0.4);
+  const pipe = mat(0x3f6e68, 0.72, 0.3);
+  const transparent = glass(0x9bd0d0, 0.12);
+  const vapor = new THREE.MeshBasicMaterial({ color: 0xe4f5f0, transparent: true, opacity: 0.22 });
 
-  // Industrial floor and structural frame.
-  box(g, [21, 0.18, 5.2], [0, -1.42, 0], material(0x11191c, 0.2, 0.88));
-  box(g, [20.8, 0.08, 0.08], [0, 2.9, -1.15], steel);
-  box(g, [20.8, 0.08, 0.08], [0, 2.55, -1.15], steelDark);
+  // Factory floor and support structure.
+  addBox(g, [21, 0.18, 5.4], [0, -1.43, 0], mat(0x10191c, 0.15, 0.9));
   for (const x of xs) {
-    box(g, [0.08, 4.1, 0.08], [x - 0.88, 0.55, -1.15], steelDark);
-    box(g, [0.08, 4.1, 0.08], [x + 0.88, 0.55, -1.15], steelDark);
-    box(g, [1.95, 0.12, 1.95], [x, -1.29, 0], steelDark);
+    addBox(g, [0.07, 4.1, 0.07], [x - 0.95, 0.45, -1.15], frame);
+    addBox(g, [0.07, 4.1, 0.07], [x + 0.95, 0.45, -1.15], frame);
   }
+  addBox(g, [20.8, 0.08, 0.08], [0, 2.5, -1.15], frame);
 
-  // Elevated process pipework: actual continuous routes rather than floating dots.
+  // A single material route ties the stations together, but the stations themselves show the transformation.
   for (let i = 0; i < xs.length - 1; i++) {
-    const a = new THREE.Vector3(xs[i] + 0.75, 0.15, 0);
-    const b = new THREE.Vector3(xs[i + 1] - 0.75, 0.15, 0);
-    pipe(g, a, b, processPipe, 0.085);
-    addFlow(animated, g, a, b, i, juice, 7, 0.16);
+    const a = new THREE.Vector3(xs[i] + 0.78, 0.1, 0);
+    const b = new THREE.Vector3(xs[i + 1] - 0.78, 0.1, 0);
+    addPipe(g, a, b, pipe, 0.065);
+    addFlow(animated, g, a, b, i, i < 3 ? juice : syrup, 6, 0.16);
   }
 
-  // 01 Preparation: belt conveyor, rollers and real cane pieces.
+  // 01 PREPARATION — whole cane is cut into short feed pieces.
   {
     const x = xs[0];
-    box(g, [1.7, 0.16, 1.15], [x - 0.15, -0.35, 0], rubber);
-    box(g, [1.82, 0.08, 1.28], [x - 0.15, -0.24, 0], steelDark);
-    for (const z of [-0.52, 0.52]) {
-      const r = cyl(g, 0.13, 1.2, [x - 0.72, -0.12, z], steel, 20); r.rotation.x = Math.PI / 2;
-      animated.push({ object: r, kind: "conveyor-roller", stage: 0, phase: z, speed: 1.8 });
+    addBox(g, [1.75, 0.14, 1.18], [x - 0.15, -0.32, 0], darkSteel);
+    for (const z of [-0.48, 0.48]) {
+      const r = addCylinder(g, 0.14, 1.08, [x - 0.72, -0.12, z], steel, 20);
+      r.rotation.x = Math.PI / 2; animated.push({ object: r, kind: "rotate-x", stage: 0, phase: z, speed: 2 });
     }
+    // Long cane stalks enter the belt from the left.
+    for (let i = 0; i < 5; i++) {
+      const stalk = addCylinder(g, 0.075, 1.1, [x - 1.05 + i * 0.2, -0.02, -0.28 + (i % 2) * 0.22], caneFresh, 10);
+      stalk.rotation.z = Math.PI / 2; animated.push({ object: stalk, kind: "whole-cane", stage: 0, phase: i / 5, speed: 0.25 });
+    }
+    // Cutter wheel makes the transformation visible rather than decorative.
+    const wheel = addCylinder(g, 0.5, 0.18, [x + 0.55, 0.22, 0], copper, 32);
+    wheel.rotation.z = Math.PI / 2; animated.push({ object: wheel, kind: "cutter", stage: 0, phase: 0, speed: 2.8 });
     for (let i = 0; i < 8; i++) {
-      const canePiece = box(g, [0.34, 0.07, 0.07], [x - 1.05 + (i % 4) * 0.28, 0.05 + Math.floor(i / 4) * 0.11, (i % 2) * 0.14], cane);
-      animated.push({ object: canePiece, kind: "cane-feed", stage: 0, phase: i / 8, speed: 0.28 });
+      const blade = addBox(g, [0.05, 0.08, 0.42], [x + 0.55, 0.22, 0], steel);
+      blade.rotation.y = (i / 8) * Math.PI * 2; animated.push({ object: blade, kind: "cutter-blade", stage: 0, phase: i / 8, speed: 2.8 });
     }
-    for (let i = -2; i <= 2; i++) {
-      const r = cyl(g, 0.16, 1.15, [x + i * 0.2, 0.35, 0], steel, 20); r.rotation.z = Math.PI / 2;
-      animated.push({ object: r, kind: "prep-roller", stage: 0, phase: i / 5, speed: 1.4 });
+    for (let i = 0; i < 12; i++) {
+      const piece = addBox(g, [0.16, 0.07, 0.07], [x + 0.55 + (i % 4) * 0.2, 0.05, -0.35 + (i % 3) * 0.3], cane);
+      animated.push({ object: piece, kind: "cut-cane", stage: 0, phase: i / 12, speed: 0.32 });
     }
   }
 
-  // 02 Shredding: enclosed drum with visible rotating shaft and discharge chute.
+  // 02 SHREDDING — open drum with knives visibly tearing the cane into fibers.
   {
     const x = xs[1];
-    const housing = cyl(g, 0.82, 1.65, [x, 0.48, 0], steelDark, 36); housing.rotation.z = Math.PI / 2;
-    const drum = cyl(g, 0.64, 1.82, [x, 0.48, 0], rubber, 32); drum.rotation.z = Math.PI / 2;
-    animated.push({ object: drum, kind: "shred-drum", stage: 1, phase: 0, speed: 2.2 });
-    const shaft = cyl(g, 0.075, 2.0, [x, 0.48, 0], steel, 12); shaft.rotation.z = Math.PI / 2;
-    animated.push({ object: shaft, kind: "shred-shaft", stage: 1, phase: 0, speed: 2.2 });
-    for (let i = 0; i < 10; i++) {
-      const blade = box(g, [0.13, 0.08, 0.46], [x - 0.55 + i * 0.12, 0.5, 0.35], copper);
-      animated.push({ object: blade, kind: "shred-blade", stage: 1, phase: i / 10, speed: 2.2 });
+    addBox(g, [1.65, 1.7, 1.35], [x, 0.15, 0], transparent);
+    const shaft = addCylinder(g, 0.09, 1.5, [x, 0.2, 0], copper, 16);
+    shaft.rotation.x = Math.PI / 2; animated.push({ object: shaft, kind: "rotate-z", stage: 1, phase: 0, speed: 3.8 });
+    for (let i = 0; i < 7; i++) {
+      const blade = addBox(g, [0.75, 0.055, 0.1], [x, 0.2, 0], steel);
+      blade.rotation.z = (i / 7) * Math.PI * 2; animated.push({ object: blade, kind: "shred-blade", stage: 1, phase: i / 7, speed: 3.8 });
     }
-    box(g, [0.72, 0.55, 0.55], [x + 0.9, -0.15, 0], steelDark);
-    for (let i = 0; i < 10; i++) {
-      const fiber = box(g, [0.2, 0.035, 0.035], [x + 0.62 + (i % 5) * 0.14, -0.18, -0.2 + (i % 3) * 0.18], cane);
-      animated.push({ object: fiber, kind: "shredded-fiber", stage: 1, phase: i / 10, speed: 0.38 });
+    // Feed chute and intact pieces entering the cutting zone.
+    addBox(g, [0.55, 0.12, 0.8], [x, 1.08, 0], frame);
+    for (let i = 0; i < 7; i++) {
+      const piece = addBox(g, [0.12, 0.22, 0.08], [x - 0.18 + (i % 3) * 0.18, 0.92, -0.25 + (i % 2) * 0.3], caneFresh);
+      animated.push({ object: piece, kind: "shred-input", stage: 1, phase: i / 7, speed: 0.28 });
+    }
+    // Fiber ribbons leave the bottom-right of the cutter.
+    for (let i = 0; i < 13; i++) {
+      const ribbon = addBox(g, [0.22, 0.035, 0.035], [x + 0.35, -0.48, -0.42 + (i % 6) * 0.16], fiber);
+      animated.push({ object: ribbon, kind: "fiber", stage: 1, phase: i / 13, speed: 0.42 });
     }
   }
 
-  // 03 Extraction: two opposed mill rolls, pressure zone and juice collection trough.
+  // 03 EXTRACTION — two grooved rolls squeeze shredded cane; juice falls, bagasse exits.
   {
     const x = xs[2];
     for (const z of [-0.34, 0.34]) {
-      const r = cyl(g, 0.43, 1.5, [x, 0.48, z], steel, 36); r.rotation.z = Math.PI / 2;
-      animated.push({ object: r, kind: "mill-roll", stage: 2, phase: z, speed: 1.55 });
-      for (let i = 0; i < 5; i++) {
-        const groove = torus(g, 0.37, 0.018, [x, 0.48, z], copper); groove.rotation.y = i * 0.22;
-        animated.push({ object: groove, kind: "roll-groove", stage: 2, phase: i / 5, speed: 1.55 });
+      const roll = addCylinder(g, 0.42, 1.25, [x, 0.28, z], steel, 36);
+      roll.rotation.x = Math.PI / 2; animated.push({ object: roll, kind: "mill-roll", stage: 2, phase: z, speed: z < 0 ? 1.8 : -1.8 });
+      for (let j = 0; j < 7; j++) {
+        const groove = new THREE.Mesh(new THREE.TorusGeometry(0.39, 0.018, 8, 30), copper);
+        groove.position.set(x, 0.28, z); groove.rotation.x = Math.PI / 2; groove.rotation.z = j * 0.08; g.add(groove);
       }
     }
-    box(g, [1.72, 0.16, 1.12], [x, -0.55, 0], steelDark);
-    box(g, [1.3, 0.08, 0.78], [x, -0.43, 0], juice);
-    for (let i = 0; i < 12; i++) {
-      const drop = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), juice); g.add(drop);
-      animated.push({ object: drop, kind: "extracted-juice", stage: 2, phase: i / 12, speed: 0.42 });
+    // Shredded cane visibly enters the nip point.
+    for (let i = 0; i < 10; i++) {
+      const strand = addBox(g, [0.18, 0.035, 0.035], [x - 0.78 + (i % 4) * 0.16, 0.48, -0.22 + (i % 3) * 0.2], fiber);
+      animated.push({ object: strand, kind: "pressed-fiber", stage: 2, phase: i / 10, speed: 0.36 });
+    }
+    addBox(g, [1.5, 0.13, 1.0], [x, -0.58, 0], darkSteel);
+    // Juice droplets separate downward.
+    for (let i = 0; i < 15; i++) {
+      const drop = new THREE.Mesh(new THREE.SphereGeometry(0.038, 8, 8), juice); g.add(drop);
+      animated.push({ object: drop, kind: "juice-drop", stage: 2, phase: i / 15, speed: 0.45 });
+    }
+    // Dry bagasse visibly leaves to the right.
+    for (let i = 0; i < 10; i++) {
+      const bagasse = addBox(g, [0.2, 0.05, 0.06], [x + 0.55 + (i % 5) * 0.16, -0.18, -0.32 + (i % 3) * 0.22], fiber);
+      animated.push({ object: bagasse, kind: "bagasse", stage: 2, phase: i / 10, speed: 0.3 });
     }
   }
 
-  // 04 Clarifier: tank, feed, slow rake and visibly settling solids.
+  // 04 CLARIFICATION — transparent vessel exposes clear juice above a settling solids layer.
   {
     const x = xs[3];
-    const tank = cyl(g, 0.76, 2.35, [x, 0.1, 0], steel, 40);
-    const liquid = cyl(g, 0.62, 1.12, [x, -0.45, 0], juice, 32);
-    liquid.castShadow = false;
-    const shaft = cyl(g, 0.045, 1.65, [x, 0.35, 0], steelDark, 12);
+    addCylinder(g, 0.78, 2.05, [x, 0.15, 0], transparent, 40);
+    addCylinder(g, 0.65, 0.92, [x, -0.38, 0], juice, 32);
+    addCylinder(g, 0.66, 0.22, [x, -0.88, 0], copper, 32);
+    const shaft = addCylinder(g, 0.045, 1.7, [x, 0.55, 0], darkSteel, 12);
     animated.push({ object: shaft, kind: "clarifier-rake", stage: 3, phase: 0, speed: 0.32 });
-    for (const y of [-0.48, -0.66]) {
-      const rake = box(g, [1.0, 0.045, 0.07], [x, y, 0], steelDark);
-      animated.push({ object: rake, kind: "clarifier-rake", stage: 3, phase: y, speed: 0.32 });
+    for (const y of [-0.48, -0.7]) {
+      const rake = addBox(g, [1.0, 0.045, 0.06], [x, y, 0], darkSteel);
+      animated.push({ object: rake, kind: "rake", stage: 3, phase: y, speed: 0.32 });
     }
-    for (let i = 0; i < 18; i++) {
-      const solid = new THREE.Mesh(new THREE.SphereGeometry(0.035, 7, 7), copper); g.add(solid);
-      animated.push({ object: solid, kind: "settling-solid", stage: 3, phase: i / 18, speed: 0.055 });
+    for (let i = 0; i < 22; i++) {
+      const solid = new THREE.Mesh(new THREE.SphereGeometry(0.028, 7, 7), copper); g.add(solid);
+      animated.push({ object: solid, kind: "settle", stage: 3, phase: i / 22, speed: 0.06 });
     }
-    tank.userData.isTank = true;
+    // Clear overflow at the top makes the separation legible.
+    addPipe(g, new THREE.Vector3(x + 0.62, 0.68, 0), new THREE.Vector3(x + 1.0, 0.68, 0), pipe, 0.06);
   }
 
-  // 05 Evaporation: calandria-style vessels, heating circulation and vapour outlet.
+  // 05 EVAPORATION — three open vessels show boiling liquid becoming darker/thicker while vapour leaves.
   {
     const x = xs[4];
     for (let i = -1; i <= 1; i++) {
       const vx = x + i * 0.48;
-      const vessel = cyl(g, 0.42, 1.9, [vx, 0.12, 0], steel, 30);
-      const liquid = cyl(g, 0.35, 0.75, [vx, -0.42, 0], juice, 24);
-      liquid.castShadow = false;
-      for (let j = 0; j < 4; j++) {
-        const coil = torus(g, 0.31, 0.028, [vx, -0.34 + j * 0.2, 0], copper);
-        animated.push({ object: coil, kind: "heater-coil", stage: 4, phase: j / 4, speed: 0.6 });
+      addCylinder(g, 0.43, 1.7, [vx, 0.1, 0], transparent, 32);
+      addCylinder(g, 0.35, 0.72, [vx, -0.42, 0], syrup, 24);
+      for (let j = 0; j < 5; j++) {
+        const coil = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.024, 8, 24), copper);
+        coil.position.set(vx, -0.43 + j * 0.17, 0); coil.rotation.x = Math.PI / 2; g.add(coil);
       }
       for (let j = 0; j < 6; j++) {
         const bubble = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), hot); g.add(bubble);
-        animated.push({ object: bubble, kind: "boiling", stage: 4, phase: (j + i + 3) / 9, speed: 0.24 });
+        animated.push({ object: bubble, kind: "bubble", stage: 4, phase: (j + i + 4) / 10, speed: 0.25 });
       }
-      vessel.userData.evaporationVessel = true;
     }
-    for (let i = 0; i < 18; i++) {
-      const puff = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), vapor); g.add(puff);
-      animated.push({ object: puff, kind: "vapour", stage: 4, phase: i / 18, speed: 0.15 });
+    for (let i = 0; i < 16; i++) {
+      const p = new THREE.Mesh(new THREE.SphereGeometry(0.042, 8, 8), vapor); g.add(p);
+      animated.push({ object: p, kind: "vapor", stage: 4, phase: i / 16, speed: 0.15 });
     }
-    pipe(g, new THREE.Vector3(x, 1.08, 0), new THREE.Vector3(x, 1.8, 0), processPipe, 0.075);
   }
 
-  // 06 Crystallizer: jacketed vessel, agitator and suspended crystal population.
+  // 06 CRYSTALLIZATION — transparent vessel shows syrup, agitation and visible sugar crystals growing.
   {
     const x = xs[5];
-    const vessel = cyl(g, 0.74, 2.0, [x, 0.1, 0], steel, 34);
-    const liquor = cyl(g, 0.61, 1.15, [x, -0.38, 0], juice, 28); liquor.castShadow = false;
-    for (let j = 0; j < 5; j++) {
-      const jacket = torus(g, 0.66, 0.025, [x, -0.62 + j * 0.28, 0], copper);
-      animated.push({ object: jacket, kind: "jacket", stage: 5, phase: j / 5, speed: 0.25 });
-    }
-    const shaft = cyl(g, 0.055, 2.5, [x, 0.48, 0], steelDark, 12);
-    animated.push({ object: shaft, kind: "agitator-shaft", stage: 5, phase: 0, speed: 0.7 });
+    addCylinder(g, 0.76, 2.0, [x, 0.1, 0], transparent, 34);
+    addCylinder(g, 0.61, 1.15, [x, -0.38, 0], syrup, 28);
+    const shaft = addCylinder(g, 0.05, 2.4, [x, 0.48, 0], darkSteel, 12);
+    animated.push({ object: shaft, kind: "agitator", stage: 5, phase: 0, speed: 0.75 });
     for (const y of [-0.45, 0, 0.45]) {
-      const blade = box(g, [1.15, 0.06, 0.08], [x, y, 0], steelDark);
-      animated.push({ object: blade, kind: "agitator-blade", stage: 5, phase: y, speed: 0.7 });
+      const blade = addBox(g, [1.05, 0.06, 0.08], [x, y, 0], darkSteel);
+      animated.push({ object: blade, kind: "agitator-blade", stage: 5, phase: y, speed: 0.75 });
     }
-    for (let i = 0; i < 28; i++) {
-      const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.035), sugar); g.add(crystal);
-      animated.push({ object: crystal, kind: "crystal-growth", stage: 5, phase: i / 28, speed: 0.12 });
+    for (let i = 0; i < 34; i++) {
+      const c = addGrain(g, [x, -0.62, 0], sugar, 0.038);
+      animated.push({ object: c, kind: "crystal", stage: 5, phase: i / 34, speed: 0.1 });
     }
-    vessel.userData.crystallizer = true;
   }
 
-  // 07 Centrifuge: basket, perforated-looking rings and outward solids separation.
+  // 07 CENTRIFUGATION — basket spins; crystal cake remains on the wall while dark mother liquor separates.
   {
     const x = xs[6];
-    const housing = cyl(g, 0.88, 1.5, [x, 0.12, 0], steelDark, 40); housing.rotation.z = Math.PI / 2;
-    const basket = cyl(g, 0.69, 1.55, [x, 0.12, 0], steel, 36); basket.rotation.z = Math.PI / 2;
-    animated.push({ object: basket, kind: "centrifuge-basket", stage: 6, phase: 0, speed: 4.2 });
-    for (let r = 0.25; r <= 0.65; r += 0.13) {
-      const ring = torus(g, r, 0.022, [x, 0.12, 0], copper);
-      animated.push({ object: ring, kind: "centrifuge-ring", stage: 6, phase: r, speed: 4.2 });
-    }
-    for (let i = 0; i < 22; i++) {
-      const grain = new THREE.Mesh(new THREE.OctahedronGeometry(0.032), sugar); g.add(grain);
-      animated.push({ object: grain, kind: "centrifuge-grain", stage: 6, phase: i / 22, speed: 4.2 });
+    addCylinder(g, 0.88, 1.45, [x, 0.12, 0], transparent, 40).rotation.z = Math.PI / 2;
+    const basket = addCylinder(g, 0.69, 1.48, [x, 0.12, 0], steel, 36);
+    basket.rotation.z = Math.PI / 2; animated.push({ object: basket, kind: "centrifuge", stage: 6, phase: 0, speed: 4.2 });
+    // Crystal cake ring and radial liquor droplets communicate the separation.
+    const cake = new THREE.Mesh(new THREE.TorusGeometry(0.57, 0.12, 14, 36), sugar); cake.position.set(x, 0.12, 0); g.add(cake);
+    animated.push({ object: cake, kind: "centrifuge-cake", stage: 6, phase: 0, speed: 4.2 });
+    for (let i = 0; i < 18; i++) {
+      const drop = new THREE.Mesh(new THREE.SphereGeometry(0.03, 7, 7), molasses); g.add(drop);
+      animated.push({ object: drop, kind: "mother-liquor", stage: 6, phase: i / 18, speed: 4.2 });
     }
   }
 
-  // 08 Dryer: perforated chamber, moving bed and hot-air stream.
+  // 08 DRYING — wet crystals enter, hot air passes through, dry crystals leave.
   {
     const x = xs[7];
-    box(g, [1.65, 2.05, 1.45], [x, 0.08, 0], steelDark);
-    box(g, [1.35, 1.5, 1.18], [x, 0.08, 0], steel);
-    for (let i = 0; i < 20; i++) {
-      const grain = new THREE.Mesh(new THREE.OctahedronGeometry(0.032), sugar); g.add(grain);
-      animated.push({ object: grain, kind: "dryer-grain", stage: 7, phase: i / 20, speed: 0.22 });
+    addBox(g, [1.6, 1.9, 1.45], [x, 0.05, 0], transparent);
+    addBox(g, [0.1, 1.7, 1.35], [x - 0.72, 0.05, 0], darkSteel);
+    addBox(g, [0.1, 1.7, 1.35], [x + 0.72, 0.05, 0], darkSteel);
+    for (let i = 0; i < 25; i++) {
+      const grain = addGrain(g, [x, -0.6, 0], sugar, 0.035);
+      animated.push({ object: grain, kind: "dry-grain", stage: 7, phase: i / 25, speed: 0.22 });
     }
-    for (let i = 0; i < 14; i++) {
-      const air = new THREE.Mesh(new THREE.SphereGeometry(0.028, 7, 7), vapor); g.add(air);
-      animated.push({ object: air, kind: "dryer-air", stage: 7, phase: i / 14, speed: 0.36 });
+    for (let i = 0; i < 15; i++) {
+      const air = new THREE.Mesh(new THREE.SphereGeometry(0.025, 7, 7), vapor); g.add(air);
+      animated.push({ object: air, kind: "hot-air", stage: 7, phase: i / 15, speed: 0.38 });
     }
-    pipe(g, new THREE.Vector3(x, -1.0, 0), new THREE.Vector3(x, -0.15, 0), processPipe, 0.08);
+    addPipe(g, new THREE.Vector3(x - 0.95, -0.95, 0), new THREE.Vector3(x - 0.7, -0.35, 0), pipe, 0.08);
   }
 
   return g;
@@ -244,7 +255,7 @@ function buildFactory(animated: Animated[]) {
 
 function cameraPose(index: number) {
   const x = xs[index];
-  return { position: new THREE.Vector3(x * 0.36, 3.35, 17.8), target: new THREE.Vector3(x * 0.33, 0.05, 0) };
+  return { position: new THREE.Vector3(x * 0.34, 2.9, 17.5), target: new THREE.Vector3(x * 0.31, 0.0, 0) };
 }
 
 export default function ProcessLineOverview() {
@@ -256,35 +267,30 @@ export default function ProcessLineOverview() {
     const element = mount.current;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x080f12);
-    scene.fog = new THREE.Fog(0x080f12, 13, 34);
-    const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 70);
+    scene.fog = new THREE.Fog(0x080f12, 12, 32);
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 70);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.7));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     element.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xd7e8e4, 0x10171a, 1.55));
-    const key = new THREE.DirectionalLight(0xf1eee5, 3.6);
-    key.position.set(3, 9, 8); key.castShadow = true; scene.add(key);
-    const rim = new THREE.DirectionalLight(0x6aa9a0, 1.5); rim.position.set(-8, 4, -5); scene.add(rim);
+    scene.add(new THREE.HemisphereLight(0xdcebe8, 0x11191c, 1.6));
+    const key = new THREE.DirectionalLight(0xf5eee1, 3.5); key.position.set(2, 8, 9); key.castShadow = true; scene.add(key);
+    const fill = new THREE.DirectionalLight(0x72b6aa, 1.1); fill.position.set(-8, 4, -5); scene.add(fill);
 
     const animated: Animated[] = [];
-    const factory = buildFactory(animated);
-    scene.add(factory);
-
+    const factory = buildFactory(animated); scene.add(factory);
     const hits = stages.map((_, index) => {
-      const h = new THREE.Mesh(new THREE.BoxGeometry(1.95, 3.6, 2.45), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
-      h.position.set(xs[index], 0.4, 0); h.userData.stageIndex = index; factory.add(h); return h;
+      const h = new THREE.Mesh(new THREE.BoxGeometry(1.95, 3.4, 2.5), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      h.position.set(xs[index], 0.3, 0); h.userData.stageIndex = index; factory.add(h); return h;
     });
     const markers = stages.map((_, index) => {
-      const m = torus(factory, 0.62, 0.035, [xs[index], -1.08, 0], new THREE.MeshStandardMaterial({ color: 0x71cbbd, emissive: 0x164c44, emissiveIntensity: 1.3, transparent: true, opacity: 0.95 }));
-      m.visible = index === 0; return m;
+      const m = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.035, 10, 32), new THREE.MeshStandardMaterial({ color: 0x71cbbd, emissive: 0x164c44, emissiveIntensity: 1.2 }));
+      m.rotation.x = Math.PI / 2; m.position.set(xs[index], -1.08, 0); m.visible = index === 0; factory.add(m); return m;
     });
-    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 2.5, 8), new THREE.MeshBasicMaterial({ color: 0x71cbbd, transparent: true, opacity: 0.35 }));
-    beam.position.set(xs[0], 0.2, 0); factory.add(beam);
 
-    let goal = cameraPose(0); let currentTarget = goal.target.clone();
+    let goal = cameraPose(0); let target = goal.target.clone();
     camera.position.copy(goal.position); camera.lookAt(goal.target);
     const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
     const pointerCoords = (e: MouseEvent | PointerEvent) => {
@@ -293,7 +299,7 @@ export default function ProcessLineOverview() {
       raycaster.setFromCamera(pointer, camera);
     };
     const selectScene = (index: number) => {
-      setSelected(index); markers.forEach((m, i) => { m.visible = i === index; }); beam.position.x = xs[index];
+      setSelected(index); markers.forEach((m, i) => { m.visible = i === index; });
       window.dispatchEvent(new CustomEvent("food-process-stage-select", { detail: index }));
     };
     const onMove = (e: PointerEvent) => { pointerCoords(e); renderer.domElement.style.cursor = raycaster.intersectObjects(hits, false).length ? "pointer" : "default"; };
@@ -310,49 +316,64 @@ export default function ProcessLineOverview() {
     renderer.domElement.addEventListener("pointermove", onMove); renderer.domElement.addEventListener("click", onClick);
     window.addEventListener("food-process-stage-select", onStage); window.addEventListener("food-process-open-inspection", onOpenInspection);
 
-    const timer = new THREE.Timer(); let animationId = 0;
+    const clock = new THREE.Clock(); let animationId = 0;
     const animate = () => {
-      animationId = requestAnimationFrame(animate); timer.update();
-      const delta = Math.min(timer.getDelta(), 0.05); const elapsed = timer.getElapsed();
+      animationId = requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.05); const elapsed = clock.elapsedTime;
       camera.position.lerp(goal.position, 1 - Math.pow(0.001, delta * 1.35));
-      currentTarget.lerp(goal.target, 1 - Math.pow(0.001, delta * 1.5)); camera.lookAt(currentTarget);
-      factory.rotation.y = Math.sin(elapsed * 0.08) * 0.008;
-      markers.forEach(m => { if (m.visible) { const s = 1 + Math.sin(elapsed * 3.5) * 0.1; m.scale.setScalar(s); } });
-      beam.scale.y = 0.88 + Math.sin(elapsed * 2.2) * 0.12;
+      target.lerp(goal.target, 1 - Math.pow(0.001, delta * 1.5)); camera.lookAt(target);
+      markers.forEach(m => { if (m.visible) m.scale.setScalar(1 + Math.sin(elapsed * 3.5) * 0.09); });
 
       animated.forEach(item => {
-        const { object, kind, stage, phase, speed } = item; const cycle = (elapsed * speed + phase) % 1; const x = xs[stage];
-        if (kind === "pipe-flow") {
-          const a = object.userData.flowA as THREE.Vector3; const b = object.userData.flowB as THREE.Vector3;
-          object.position.lerpVectors(a, b, cycle);
-        } else if (kind === "cane-feed") {
-          object.position.x = x - 1.15 + cycle * 1.8; object.position.z = Math.sin(cycle * Math.PI * 2 + phase * 8) * 0.12; object.rotation.z = cycle * Math.PI * 2;
-        } else if (kind === "conveyor-roller") {
+        const { object, kind, stage, phase, speed } = item;
+        const cycle = (elapsed * speed + phase) % 1; const x = xs[stage];
+        if (kind === "flow") {
+          object.position.lerpVectors(object.userData.a as THREE.Vector3, object.userData.b as THREE.Vector3, cycle);
+        } else if (kind === "whole-cane") {
+          object.position.x = x - 1.15 + cycle * 1.35; object.rotation.x += delta * 0.5;
+        } else if (kind === "cut-cane") {
+          object.position.x = x + 0.45 + cycle * 0.75; object.position.y = 0.03 + Math.sin(cycle * 5 + phase) * 0.04;
+        } else if (kind === "rotate-x") {
           object.rotation.x += delta * speed;
-        } else if (["prep-roller", "shred-drum", "shred-shaft", "shred-blade", "mill-roll", "roll-groove", "centrifuge-basket", "centrifuge-ring", "agitator-shaft", "agitator-blade", "jacket"].includes(kind)) {
+        } else if (kind === "cutter" || kind === "cutter-blade") {
           object.rotation.x += delta * speed;
-          if (kind === "shred-blade" || kind === "agitator-blade") object.rotation.y += delta * speed * 0.35;
-        } else if (kind === "shredded-fiber") {
-          object.position.x = x + 0.5 + cycle * 0.9; object.position.y = -0.18 + Math.sin(cycle * 7 + phase) * 0.08; object.rotation.z += delta * 2;
-        } else if (kind === "extracted-juice") {
-          object.position.set(x - 0.55 + (phase * 12 % 4) * 0.25, -0.4 - cycle * 0.42, -0.35 + (phase * 7 % 3) * 0.28); object.scale.setScalar(0.65 + Math.sin(cycle * Math.PI) * 0.35);
-        } else if (kind === "settling-solid") {
-          object.position.set(x - 0.45 + (phase * 17 % 4) * 0.25, 0.62 - cycle * 1.25, -0.3 + (phase * 13 % 3) * 0.22);
-        } else if (kind === "boiling") {
-          object.position.set(x + (phase * 7 % 3) * 0.18 - 0.2 + Math.sin(elapsed * 2 + phase) * 0.04, -0.35 + cycle * 1.05, 0.04); object.scale.setScalar(0.5 + Math.sin(cycle * Math.PI) * 0.7);
-        } else if (kind === "vapour") {
-          object.position.set(x - 0.65 + (phase * 11 % 5) * 0.3 + Math.sin(elapsed + phase) * 0.05, 1.0 + cycle * 1.65, -0.04); object.scale.setScalar(0.55 + Math.sin(cycle * Math.PI) * 0.7);
-        } else if (kind === "crystal-growth") {
-          const a = phase * Math.PI * 2 + elapsed * 0.18; const r = 0.12 + ((phase * 19) % 5) * 0.08;
-          object.position.set(x + Math.cos(a) * r, -0.65 + ((phase * 23) % 7) * 0.16 + cycle * 0.05, Math.sin(a) * r);
-          object.scale.setScalar(0.35 + cycle * 1.0); object.rotation.x += delta * 0.25; object.rotation.y += delta * 0.4;
-        } else if (kind === "centrifuge-grain") {
-          const a = elapsed * 4.2 + phase * Math.PI * 2; const r = 0.18 + cycle * 0.62;
-          object.position.set(x + Math.cos(a) * r, 0.12 + Math.sin(a * 2) * 0.08, Math.sin(a) * r); object.rotation.x += delta * 2.5; object.rotation.y += delta * 2.5;
-        } else if (kind === "dryer-grain") {
-          object.position.set(x - 0.5 + (phase * 17 % 6) * 0.17, -0.58 + cycle * 1.35, -0.42 + (phase * 13 % 5) * 0.18); object.rotation.x += delta * 0.8; object.rotation.y += delta * 1.0;
-        } else if (kind === "dryer-air") {
-          object.position.set(x - 0.45 + (phase * 11 % 5) * 0.2, -0.95 + cycle * 1.8, -0.38 + (phase * 7 % 4) * 0.22); object.scale.setScalar(0.5 + Math.sin(cycle * Math.PI) * 0.55);
+        } else if (kind === "shred-blade") {
+          object.rotation.z += delta * speed;
+        } else if (kind === "shred-input") {
+          object.position.y = 1.0 - cycle * 1.0; object.position.x = x - 0.15 + Math.sin(cycle * 5 + phase) * 0.16;
+        } else if (kind === "fiber") {
+          object.position.x = x + 0.25 + cycle * 0.9; object.position.y = -0.45 - cycle * 0.2;
+          object.rotation.z += delta * 2;
+        } else if (kind === "mill-roll") {
+          object.rotation.z += delta * speed;
+        } else if (kind === "pressed-fiber") {
+          object.position.x = x - 0.8 + cycle * 0.85; object.scale.x = 1 - cycle * 0.25;
+        } else if (kind === "juice-drop") {
+          object.position.set(x - 0.5 + (phase * 13 % 4) * 0.24, -0.05 - cycle * 0.95, -0.28 + (phase * 7 % 3) * 0.2);
+        } else if (kind === "bagasse") {
+          object.position.x = x + 0.45 + cycle * 0.9; object.position.y = -0.18 + Math.sin(cycle * 6 + phase) * 0.06;
+        } else if (kind === "clarifier-rake" || kind === "rake") {
+          object.rotation.y += delta * speed;
+        } else if (kind === "settle") {
+          object.position.set(x - 0.45 + (phase * 17 % 4) * 0.24, 0.55 - cycle * 1.32, -0.25 + (phase * 11 % 3) * 0.22);
+        } else if (kind === "bubble") {
+          object.position.set(x + ((phase * 9) % 3) * 0.2 - 0.2, -0.35 + cycle * 0.92, 0.02); object.scale.setScalar(0.45 + Math.sin(cycle * Math.PI) * 0.7);
+        } else if (kind === "vapor") {
+          object.position.set(x - 0.65 + ((phase * 11) % 5) * 0.3, 0.85 + cycle * 1.4, 0); object.scale.setScalar(0.5 + Math.sin(cycle * Math.PI) * 0.7);
+        } else if (kind === "agitator" || kind === "agitator-blade") {
+          object.rotation.y += delta * speed;
+        } else if (kind === "crystal") {
+          const a = phase * Math.PI * 2 + elapsed * 0.12; const r = 0.1 + ((phase * 23) % 6) * 0.075;
+          object.position.set(x + Math.cos(a) * r, -0.66 + ((phase * 19) % 8) * 0.14, Math.sin(a) * r); object.scale.setScalar(0.35 + cycle * 1.0);
+        } else if (kind === "centrifuge" || kind === "centrifuge-cake") {
+          object.rotation.x += delta * speed;
+        } else if (kind === "mother-liquor") {
+          const a = elapsed * speed + phase * Math.PI * 2; const r = 0.18 + cycle * 0.65;
+          object.position.set(x + Math.cos(a) * r, 0.12 + Math.sin(a * 2) * 0.07, Math.sin(a) * r);
+        } else if (kind === "dry-grain") {
+          object.position.set(x - 0.55 + cycle * 1.1, -0.6 + cycle * 1.3, -0.42 + (phase * 13 % 5) * 0.18); object.rotation.x += delta; object.rotation.y += delta;
+        } else if (kind === "hot-air") {
+          object.position.set(x - 0.48 + (phase * 11 % 5) * 0.2, -0.9 + cycle * 1.75, -0.38 + (phase * 7 % 4) * 0.2); object.scale.setScalar(0.5 + Math.sin(cycle * Math.PI) * 0.6);
         }
       });
       renderer.render(scene, camera);
@@ -370,10 +391,10 @@ export default function ProcessLineOverview() {
   return (
     <section className="process-line-overview">
       <div className="process-line-heading">
-        <div><span>PRODUCTION LINE · REALISTIC PROCESS VIEW</span><h2>Watch the physical transformation inside the factory</h2></div>
-        <p>The animation now follows machine mechanics and material behavior instead of decorative motion: rollers rotate, fluids travel through pipes, solids settle, vapour rises, crystals form and separation occurs.</p>
+        <div><span>3D PROCESS LAB · MATERIAL TRANSFORMATION</span><h2>See what happens to the sugarcane</h2></div>
+        <p>Each station exposes the physical action: cane is cut, fibers are shredded, juice is squeezed out, solids settle, water boils away, crystals grow, liquor separates and sugar dries.</p>
       </div>
-      <div ref={mount} className="process-line-canvas" aria-label="Interactive realistic 3D sugar production process" />
+      <div ref={mount} className="process-line-canvas" aria-label="Interactive 3D sugarcane transformation process" />
       <div className="process-line-stages">
         {stages.map((item, index) => <button key={item.stepId} type="button" className={selected === index ? "process-line-stage active" : "process-line-stage"} onClick={() => select(index)}><strong>{String(index + 1).padStart(2, "0")}</strong><span>{item.name}</span><small>{item.equipmentId}</small></button>)}
       </div>
