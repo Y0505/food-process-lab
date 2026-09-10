@@ -1,7 +1,10 @@
 import type { MaterialStream } from "@/domain/material";
-import type { MultiStreamSimulationResult } from "@/domain/multi-stream-simulation";
+import {
+  runMultiStreamProcess,
+  type MultiStreamSimulationResult,
+} from "@/domain/multi-stream-simulation";
 import { sugarcaneToSugar } from "./sugarcane";
-import { sugarcaneMultiStreamProcess } from "./sugarcane-multi-stream-simulation";
+import { sugarcaneMultiStreamTransformations } from "./sugarcane-multi-stream-simulation";
 import { illustrativeSugarcaneFeed } from "./sugarcane-material";
 
 export interface ProcessVisualizationStage {
@@ -26,12 +29,16 @@ export interface SugarcaneVisualizationModel {
 }
 
 export function buildSugarcaneVisualizationModel(): SugarcaneVisualizationModel {
-  const simulation = sugarcaneMultiStreamProcess && sugarcaneToSugar
-    ? runSimulation()
-    : runSimulation();
+  const simulation = runMultiStreamProcess(
+    sugarcaneToSugar,
+    [illustrativeSugarcaneFeed],
+    sugarcaneMultiStreamTransformations,
+  );
 
   const stages = sugarcaneToSugar.steps.map((step, index) => {
     const result = simulation.steps[index];
+    if (!result) throw new Error(`Missing simulation result for step: ${step.id}`);
+
     return {
       stepId: step.id,
       name: step.name,
@@ -49,23 +56,3 @@ export function buildSugarcaneVisualizationModel(): SugarcaneVisualizationModel 
     simulation,
   };
 }
-
-function runSimulation(): MultiStreamSimulationResult {
-  return requireSimulation();
-}
-
-function requireSimulation(): MultiStreamSimulationResult {
-  const { runMultiStreamProcess } = requireMultiStreamRunner();
-  return runMultiStreamProcess(
-    sugarcaneToSugar,
-    [illustrativeSugarcaneFeed],
-    sugarcaneMultiStreamProcessTransformations,
-  );
-}
-
-function requireMultiStreamRunner(): typeof import("@/domain/multi-stream-simulation") {
-  return require("@/domain/multi-stream-simulation") as typeof import("@/domain/multi-stream-simulation");
-}
-
-const sugarcaneMultiStreamProcessTransformations =
-  require("./sugarcane-multi-stream-simulation").sugarcaneMultiStreamTransformations as import("@/domain/multi-stream-simulation").MultiStreamTransformationRegistry;
