@@ -25,7 +25,7 @@ Process logic must remain testable without a renderer.
 
 ## Current Status
 
-**Phase:** 4 — Process visualization integration / procedural visual polish / station interaction
+**Phase:** 4 — Process visualization integration / immersive plant presentation / station inspection
 
 ### Completed
 
@@ -55,22 +55,27 @@ Process logic must remain testable without a renderer.
 - Added active-stage highlighting and a live process-state overlay.
 - Replaced uniform equipment boxes with original procedural equipment forms tailored to the eight process stages.
 - Added procedural labels, industrial floor/grid, shadows, fog, lighting, particles, and tone mapping for a richer learning-oriented scene.
-- Removed the deprecated `THREE.Clock` usage in favor of `THREE.Timer`.
-- Added substantially denser procedural equipment detail: supports, flanges, valve wheels, stems, gauges, internal shafts, coils, transfer pipe runs, and stage-specific subassemblies.
-- Added clickable equipment/stage selection so the active process station can be inspected from the viewport or stage strip.
-- Added a process-stage control strip, process legend, and visible station parameters in the overlay.
-- Added differentiated animated material particles in the process lanes in addition to the main flow markers.
+- Replaced deprecated `THREE.Clock` usage with `THREE.Timer`.
+- Added denser procedural equipment detail: supports, flanges, valve wheels, stems, gauges, internal shafts, coils, transfer pipe runs, and stage-specific subassemblies.
+- Added clickable equipment/stage selection from the viewport and stage strip.
+- Added process-stage controls, process legend, and visible station parameters.
+- Added differentiated animated material particles in process lanes.
+- Added a complete production-line overview that presents all eight units as one connected factory path.
+- Added an original equipment inspection experience with stage-specific internal procedural views and educational observation/output panels.
+- Added an immersive factory-overview frame with industrial grid, ambient glow, live-model HUD, process metrics, and visual legend around the production line.
 
 ### In Progress
 
-- Manual browser verification of the denser procedural plant and station interaction.
+- Manual browser verification of the immersive plant presentation and station interaction.
 - Improve equipment-specific material-flow behavior after visual review.
+- Build true camera travel from the plant overview into selected equipment.
+- Replace the current dedicated internal inspection transition with a more spatial cutaway experience where useful.
 - Review simplified educational assumptions before presenting them as UI data.
 
 ### Not Yet Implemented
 
-- Camera focus/inspection mode.
-- Internal/cutaway inspection.
+- True camera travel / focus transition through the plant.
+- True cutaway interaction integrated with the main plant view.
 - Complete engineering parameter dataset.
 - Engineering validation beyond domain-level checks.
 - Simulation timeline controls.
@@ -150,16 +155,19 @@ Material streams support component composition so later stages can represent jui
 - [x] Equipment/stage selection
 - [x] Visible stage parameters
 - [x] Process legend / interaction guidance
-- [ ] Camera focus/inspection mode
-- [ ] Equipment-specific flow visualization
+- [x] Complete production-line overview
+- [x] Immersive factory presentation frame
+- [ ] True camera focus/travel
+- [ ] Equipment-specific flow visualization refinement
 - [ ] Simulation state timeline visualization
 
 ### Inspection
 
-- [ ] Identify equipment requiring internal visibility
-- [ ] Original internal representations
-- [ ] Cutaway/inspection interaction
-- [ ] Educational component highlighting
+- [x] Identify the eight process units for inspection
+- [x] Original internal procedural representations
+- [x] Dedicated equipment inspection interaction
+- [ ] Cutaway integrated into main plant camera experience
+- [ ] Educational component highlighting inside equipment
 
 ### Simulation
 
