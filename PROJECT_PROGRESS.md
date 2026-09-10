@@ -25,7 +25,7 @@ Process logic must remain testable without a renderer.
 
 ## Current Status
 
-**Phase:** 2 — Process Engine Vertical Slice → Phase 4 visualization integration
+**Phase:** 4 — Process visualization integration / procedural visual polish
 
 ### Completed
 
@@ -50,18 +50,22 @@ Process logic must remain testable without a renderer.
 - Added an AI-oriented `AGENTS.md` handoff file.
 - Added a pure visualization-model adapter that maps deterministic simulation state to process stages.
 - Added tests for visualization-model mapping and stream-state exposure.
+- Connected the deterministic visualization model to the Three.js viewport.
+- Added animated material-flow markers whose speed is derived from simulated mass flow.
+- Added active-stage highlighting and a live process-state overlay.
+- Replaced uniform equipment boxes with original procedural equipment forms tailored to the eight process stages.
+- Added procedural labels, industrial floor/grid, shadows, fog, lighting, particles, and tone mapping for a richer learning-oriented scene.
+- Removed the deprecated `THREE.Clock` usage in favor of `THREE.Timer`.
 
 ### In Progress
 
-- Verify the new visualization-model adapter locally.
-- Connect deterministic process state to the existing Three.js viewport.
+- Manual browser verification of the richer procedural visualization.
+- Improve equipment-specific material-flow behavior after visual review.
 - Review simplified educational assumptions before presenting them as UI data.
 
 ### Not Yet Implemented
 
-- Equipment-specific original visual representations beyond the current primitives.
 - Equipment selection.
-- Material-flow visualization/animation.
 - Parameter display/input.
 - Simulation timeline.
 - Internal/cutaway inspection.
@@ -131,13 +135,17 @@ Material streams support component composition so later stages can represent jui
 ### Visualization
 
 - [x] Original 3D scene
-- [x] Original primitive equipment representations
+- [x] Original procedural equipment representations
 - [x] Connect equipment to process data
 - [x] Pure visualization-model adapter for simulation state
+- [x] Animated material-flow markers
+- [x] Active stage highlighting
+- [x] Live process-state overlay
+- [x] Procedural visual polish (lighting, shadows, grid, fog, particles, labels)
 - [ ] Equipment selection
-- [ ] Material-flow visualization
+- [ ] Equipment-specific flow visualization
 - [ ] Parameter display
-- [ ] Simulation state visualization in the viewport
+- [ ] Simulation state timeline visualization
 
 ### Inspection
 
@@ -211,9 +219,9 @@ No additional dependency should be added without a corresponding license decisio
 
 ## Current Next Task
 
-**Testing gate:** pull the latest commits and run `npm test`. This verifies the new pure visualization-model adapter before the browser/Three.js integration is considered ready for manual UI testing.
+**Testing gate:** run the latest browser build locally after pulling the procedural visualization changes. Verify the richer scene, then report any visual or console issue before the next equipment-interaction slice.
 
-After the test gate passes, connect `buildSugarcaneVisualizationModel()` to the existing `ProcessViewport` without moving process logic into the renderer. Then add a small, readable process-state panel or overlay and map stage state to the corresponding 3D equipment.
+After successful browser verification, implement equipment selection and inspection-oriented interaction without moving process logic into the renderer.
 
 ## Change Log
 
@@ -234,3 +242,6 @@ After the test gate passes, connect `buildSugarcaneVisualizationModel()` to the 
 - Added `AGENTS.md` as a compact AI-agent handoff guide.
 - Added `sugarcane-visualization-model.ts` to keep simulation-to-renderer mapping pure and testable.
 - Added visualization-model tests.
+- Connected simulation state to the Three.js viewport with active-stage highlighting and animated flow markers.
+- Rebuilt the viewport equipment as original procedural forms with richer lighting, shadows, fog, grid, particles, labels, and tone mapping.
+- Replaced deprecated `THREE.Clock` usage with `THREE.Timer`.
