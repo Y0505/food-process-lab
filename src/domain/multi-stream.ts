@@ -93,8 +93,8 @@ export function splitStreamByComponentRecovery(
   }
 
   return [
-    buildComponentStream(input, outputIds[0], firstMass, input.components),
-    buildComponentStream(input, outputIds[1], secondMass, input.components),
+    buildComponentStream(input, outputIds[0], firstMassByComponent, input.components),
+    buildComponentStream(input, outputIds[1], secondMassByComponent, input.components),
   ];
 }
 
