@@ -1,5 +1,12 @@
 import type { ProcessDefinition } from "@/domain/process";
 
+const parameter = (
+  id: string,
+  name: string,
+  unit: "kg/h" | "°C" | "bar" | "%" | "kg",
+  value: number,
+) => ({ id, name, unit, value });
+
 export const sugarcaneToSugar: ProcessDefinition = {
   id: "sugarcane-to-sugar",
   name: "Sugarcane to Sugar",
@@ -16,49 +23,52 @@ export const sugarcaneToSugar: ProcessDefinition = {
       name: "Size Reduction / Shredding",
       equipmentId: "shredder",
       description: "Reduces cane structure to improve juice extraction.",
-      parameters: [],
+      parameters: [parameter("material-loss", "Illustrative preparation material loss", "%", 2)],
     },
     {
       id: "extraction",
       name: "Juice Extraction",
       equipmentId: "extraction-unit",
       description: "Separates juice from fibrous bagasse.",
-      parameters: [],
+      parameters: [parameter("juice-yield", "Illustrative juice yield", "%", 70)],
     },
     {
       id: "clarification",
       name: "Juice Clarification",
       equipmentId: "clarifier",
-      description: "Removes suspended and dissolved impurities from extracted juice.",
-      parameters: [],
+      description: "Removes a simplified representation of suspended solids from extracted juice.",
+      parameters: [parameter("solids-removal", "Illustrative solids removal", "%", 5)],
     },
     {
       id: "evaporation",
       name: "Evaporation",
       equipmentId: "evaporator",
       description: "Concentrates clarified juice by removing water.",
-      parameters: [],
+      parameters: [parameter("target-temperature", "Illustrative target temperature", "°C", 105)],
     },
     {
       id: "crystallization",
       name: "Crystallization",
       equipmentId: "crystallizer",
       description: "Promotes formation of sugar crystals from concentrated syrup.",
-      parameters: [],
+      parameters: [parameter("target-temperature", "Illustrative target temperature", "°C", 65)],
     },
     {
       id: "centrifugation",
       name: "Centrifugation",
       equipmentId: "centrifuge",
       description: "Separates sugar crystals from the remaining mother liquor.",
-      parameters: [],
+      parameters: [parameter("mother-liquor-removal", "Illustrative mother-liquor removal", "%", 25)],
     },
     {
       id: "drying",
       name: "Drying",
       equipmentId: "dryer",
       description: "Reduces moisture in separated sugar crystals.",
-      parameters: [],
+      parameters: [
+        parameter("target-temperature", "Illustrative target temperature", "°C", 60),
+        parameter("target-moisture", "Illustrative target moisture", "%", 0.1),
+      ],
     },
   ],
   connections: [
