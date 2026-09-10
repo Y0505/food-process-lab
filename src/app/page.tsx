@@ -1,8 +1,10 @@
 import ProcessExplorer from "@/components/process-explorer";
+import ProcessExplorerStyles from "@/components/process-explorer-styles";
 
 export default function HomePage() {
   return (
     <main>
+      <ProcessExplorerStyles />
       <header style={{ padding: "30px 28px 20px", maxWidth: 1040, margin: "0 auto" }}>
         <p style={{ margin: 0, fontSize: 11, letterSpacing: 2.2, textTransform: "uppercase", opacity: 0.58 }}>
           FoodProcessLab · Interactive Process Lab
