@@ -119,10 +119,15 @@ function buildComponentStream(
         : (componentMasses.get(component.id) ?? 0) / massFlowKgPerHour,
   }));
 
+  const waterMass = componentMasses.get("water") ?? 0;
+  const moisturePercent =
+    massFlowKgPerHour === 0 ? 0 : (waterMass / massFlowKgPerHour) * 100;
+
   return {
     ...input,
     id,
     massFlowKgPerHour,
+    moisturePercent,
     components,
   };
 }
