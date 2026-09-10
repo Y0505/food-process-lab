@@ -25,7 +25,7 @@ Process logic must remain testable without a renderer.
 
 ## Current Status
 
-**Phase:** 4 — Process visualization integration / immersive plant presentation / station inspection
+**Phase:** 4 — Process visualization integration / immersive plant presentation / guided station navigation
 
 ### Completed
 
@@ -63,19 +63,20 @@ Process logic must remain testable without a renderer.
 - Added a complete production-line overview that presents all eight units as one connected factory path.
 - Added an original equipment inspection experience with stage-specific internal procedural views and educational observation/output panels.
 - Added an immersive factory-overview frame with industrial grid, ambient glow, live-model HUD, process metrics, and visual legend around the production line.
+- Added a guided factory tour control that steps through the eight process stations automatically.
 
 ### In Progress
 
-- Manual browser verification of the immersive plant presentation and station interaction.
+- Manual browser verification of the immersive plant presentation, guided tour, and station interaction.
+- Replace the current station-to-station rebuild transition with smooth camera travel inside the same Three.js scene.
+- Build a spatial cutaway path from the selected plant unit into the existing internal equipment inspection experience.
 - Improve equipment-specific material-flow behavior after visual review.
-- Build true camera travel from the plant overview into selected equipment.
-- Replace the current dedicated internal inspection transition with a more spatial cutaway experience where useful.
 - Review simplified educational assumptions before presenting them as UI data.
 
 ### Not Yet Implemented
 
-- True camera travel / focus transition through the plant.
-- True cutaway interaction integrated with the main plant view.
+- Smooth in-scene camera travel / focus transition.
+- Cutaway integrated into the main plant camera experience.
 - Complete engineering parameter dataset.
 - Engineering validation beyond domain-level checks.
 - Simulation timeline controls.
@@ -157,7 +158,8 @@ Material streams support component composition so later stages can represent jui
 - [x] Process legend / interaction guidance
 - [x] Complete production-line overview
 - [x] Immersive factory presentation frame
-- [ ] True camera focus/travel
+- [x] Guided factory tour
+- [ ] Smooth camera focus/travel
 - [ ] Equipment-specific flow visualization refinement
 - [ ] Simulation state timeline visualization
 
