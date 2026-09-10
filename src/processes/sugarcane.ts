@@ -29,8 +29,14 @@ export const sugarcaneToSugar: ProcessDefinition = {
       id: "extraction",
       name: "Juice Extraction",
       equipmentId: "extraction-unit",
-      description: "Separates juice from fibrous bagasse.",
-      parameters: [parameter("juice-yield", "Illustrative juice yield", "%", 70)],
+      description: "Separates juice from fibrous bagasse using explicit component recovery assumptions.",
+      parameters: [
+        parameter("juice-yield", "Illustrative juice yield", "%", 70),
+        parameter("water-to-juice-percent", "Illustrative water recovery to juice", "%", 75),
+        parameter("sucrose-to-juice-percent", "Illustrative sucrose recovery to juice", "%", 90),
+        parameter("fiber-to-juice-percent", "Illustrative fiber recovery to juice", "%", 30),
+        parameter("other-solids-to-juice-percent", "Illustrative other-solids recovery to juice", "%", 32.5),
+      ],
     },
     {
       id: "clarification",
