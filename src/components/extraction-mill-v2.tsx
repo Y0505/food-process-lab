@@ -1,41 +1,54 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-const mat = (color: number, metalness = 0.15, roughness = 0.5) =>
+const metal = (color: number, metalness = 0.75, roughness = 0.3) =>
   new THREE.MeshStandardMaterial({ color, metalness, roughness });
+const matte = (color: number, roughness = 0.7) =>
+  new THREE.MeshStandardMaterial({ color, metalness: 0.02, roughness });
 
-const STEEL = mat(0x647174, 0.88, 0.28);
-const DARK = mat(0x202c2f, 0.9, 0.25);
-const FRAME = mat(0x39484a, 0.78, 0.34);
-const COPPER = mat(0xa86d3f, 0.72, 0.3);
-const RUBBER = mat(0x171b1c, 0.05, 0.82);
-const CANE = mat(0x91a84d, 0, 0.86);
-const FIBER = mat(0x987149, 0, 0.92);
-const JUICE = mat(0x5c963f, 0, 0.3);
-const TRAY = mat(0x35494a, 0.72, 0.32);
-const GLASS = new THREE.MeshPhysicalMaterial({
-  color: 0xa8ded8,
+const STEEL = metal(0x7d8888, 0.9, 0.24);
+const STEEL_DARK = metal(0x364447, 0.86, 0.3);
+const FRAME = metal(0x425255, 0.72, 0.34);
+const SHAFT = metal(0x9ba4a2, 0.92, 0.2);
+const GEAR = metal(0x59686a, 0.88, 0.25);
+const COPPER = metal(0xb8783f, 0.72, 0.3);
+const RUBBER = matte(0x171b1c, 0.88);
+const CANE = matte(0x9aac4c, 0.78);
+const FIBER = matte(0x9b754b, 0.92);
+const FIBER_DARK = matte(0x765638, 0.94);
+const JUICE = new THREE.MeshPhysicalMaterial({
+  color: 0x73a33d,
+  roughness: 0.2,
+  metalness: 0,
+  transmission: 0.05,
   transparent: true,
-  opacity: 0.12,
+  opacity: 0.9,
+});
+const JUICE_GLOW = new THREE.MeshBasicMaterial({ color: 0x9fca55, transparent: true, opacity: 0.45 });
+const GLASS = new THREE.MeshPhysicalMaterial({
+  color: 0x8fd8cc,
+  transparent: true,
+  opacity: 0.09,
   roughness: 0.08,
-  transmission: 0.2,
+  transmission: 0.12,
   depthWrite: false,
   side: THREE.DoubleSide,
 });
+const DARK_BEARING = metal(0x222c2e, 0.82, 0.34);
 
-function addBox(g: THREE.Group, size: [number, number, number], pos: [number, number, number], material: THREE.Material) {
+function addBox(g: THREE.Group, size: [number, number, number], position: [number, number, number], material: THREE.Material) {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
-  mesh.position.set(...pos);
+  mesh.position.set(...position);
   mesh.castShadow = mesh.receiveShadow = true;
   g.add(mesh);
   return mesh;
 }
 
-function addCylinder(g: THREE.Group, radius: number, length: number, pos: [number, number, number], material: THREE.Material, radial = 32) {
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, radial), material);
-  mesh.position.set(...pos);
+function addCylinder(g: THREE.Group, radius: number, depth: number, position: [number, number, number], material: THREE.Material, radial = 32) {
+  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, depth, radial), material);
+  mesh.position.set(...position);
   mesh.castShadow = mesh.receiveShadow = true;
   g.add(mesh);
   return mesh;
@@ -51,187 +64,299 @@ function addPipe(g: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, radius: num
   return mesh;
 }
 
-function addTorus(g: THREE.Group, radius: number, tube: number, pos: [number, number, number], material: THREE.Material) {
-  const mesh = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 12, 48), material);
-  mesh.position.set(...pos);
+function addGear(g: THREE.Group, radius: number, teeth: number, position: [number, number, number], material: THREE.Material) {
+  const shape = new THREE.Shape();
+  const inner = radius * 0.78;
+  for (let i = 0; i < teeth * 4; i++) {
+    const angle = (i / (teeth * 4)) * Math.PI * 2;
+    const phase = i % 4;
+    const r = phase === 1 || phase === 2 ? radius : inner;
+    const x = Math.cos(angle) * r;
+    const y = Math.sin(angle) * r;
+    if (i === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  }
+  shape.closePath();
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.16,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    bevelSize: 0.025,
+    bevelThickness: 0.025,
+  });
+  geometry.center();
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(...position);
+  mesh.rotation.x = Math.PI / 2;
   mesh.castShadow = mesh.receiveShadow = true;
   g.add(mesh);
   return mesh;
 }
 
+function addRollGrooves(g: THREE.Group, x: number, y: number, z: number) {
+  for (let i = 0; i < 9; i++) {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.59, 0.026, 8, 48), COPPER);
+    ring.position.set(x, y, z);
+    ring.rotation.x = Math.PI / 2;
+    ring.rotation.z = (i - 4) * 0.04;
+    ring.castShadow = ring.receiveShadow = true;
+    g.add(ring);
+  }
+}
+
 export default function ExtractionMillV2() {
   const mount = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
+  const [slow, setSlow] = useState(false);
+  const pausedRef = useRef(false);
+  const slowRef = useRef(false);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    slowRef.current = slow;
+  }, [paused, slow]);
 
   useEffect(() => {
     if (!mount.current) return;
     const host = mount.current;
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x071013);
-    scene.fog = new THREE.Fog(0x071013, 8, 20);
+    scene.background = new THREE.Color(0x050b0d);
+    scene.fog = new THREE.Fog(0x050b0d, 9, 22);
 
-    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 30);
-    camera.position.set(5.4, 3.8, 7.7);
-    camera.lookAt(0, 0.15, 0);
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 35);
+    const baseCamera = new THREE.Vector3(5.6, 3.35, 8.9);
+    camera.position.copy(baseCamera);
+    camera.lookAt(0.15, 0.05, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.7));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     host.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xd9ebe7, 0x101719, 1.8));
-    const key = new THREE.DirectionalLight(0xfff0d8, 3.5);
+    scene.add(new THREE.HemisphereLight(0xe1eee9, 0x0a1114, 2.05));
+    const key = new THREE.DirectionalLight(0xffe6c5, 4.0);
     key.position.set(5, 8, 7);
     key.castShadow = true;
+    key.shadow.mapSize.set(1536, 1536);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0x69aaa2, 1.15);
-    fill.position.set(-5, 4, -4);
-    scene.add(fill);
+    const rim = new THREE.DirectionalLight(0x6ec7b6, 1.5);
+    rim.position.set(-6, 4, -6);
+    scene.add(rim);
+    const warm = new THREE.PointLight(0xffa55e, 1.2, 10);
+    warm.position.set(0, 1.6, 2.8);
+    scene.add(warm);
 
     const root = new THREE.Group();
-    root.rotation.y = -0.22;
+    root.rotation.y = -0.18;
     scene.add(root);
 
-    addBox(root, [8.6, 0.18, 4.8], [0, -1.35, 0], mat(0x10191c, 0.05, 0.94));
-
-    // Heavy structural frame: columns, cross members and bearing supports.
-    for (const x of [-2.85, -1.0, 1.0, 2.85]) {
-      for (const z of [-1.35, 1.35]) addBox(root, [0.22, 2.65, 0.22], [x, -0.02, z], FRAME);
-    }
-    for (const y of [-1.0, 1.08]) {
-      for (const z of [-1.35, 1.35]) addBox(root, [6.0, 0.2, 0.2], [0, y, z], FRAME);
-    }
-    addBox(root, [6.0, 0.18, 0.18], [0, 0.05, -1.35], STEEL);
-    addBox(root, [6.0, 0.18, 0.18], [0, 0.05, 1.35], STEEL);
-
-    // Feed chute and throat guide the shredded cane into the compression nip.
-    const chute = new THREE.Group();
-    chute.position.set(-2.2, 1.15, 0);
-    root.add(chute);
-    addBox(chute, [1.35, 0.08, 1.55], [0, 0, -0.68], STEEL).rotation.z = -0.18;
-    addBox(chute, [1.35, 0.08, 1.55], [0, 0, 0.68], STEEL).rotation.z = 0.18;
-    addBox(chute, [1.25, 0.12, 1.3], [0, -0.72, 0], DARK);
-    addBox(root, [0.18, 0.75, 1.65], [-1.45, 0.1, 0], STEEL);
-
-    // Three heavy rollers form the recognizable extraction mechanism.
-    const rolls = new THREE.Group();
-    rolls.position.set(0.15, 0, 0);
-    root.add(rolls);
-    const rollMeshes: THREE.Mesh[] = [];
-    const rollX = [-0.82, 0, 0.82];
-    const rollY = [0.02, 0.55, 0.02];
-    rollX.forEach((x, i) => {
-      const roll = addCylinder(rolls, 0.57, 2.55, [x, rollY[i], 0], STEEL, 40);
-      roll.rotation.x = Math.PI / 2;
-      rollMeshes.push(roll);
-      for (let ring = 0; ring < 7; ring++) {
-        const groove = addTorus(rolls, 0.51, 0.022, [x, rollY[i], 0], COPPER);
-        groove.rotation.x = Math.PI / 2;
-        groove.rotation.z = (ring * Math.PI) / 7;
-      }
-      // Bearing housings at both ends make the rotating shafts readable.
+    // Industrial base and heavy welded frame.
+    addBox(root, [9.2, 0.18, 5.6], [0, -1.48, 0], matte(0x11191b, 0.92));
+    addBox(root, [7.1, 0.26, 2.85], [0.35, -1.28, 0], STEEL_DARK);
+    for (const x of [-2.85, 2.55]) {
       for (const z of [-1.42, 1.42]) {
-        addCylinder(root, 0.25, 0.32, [x, rollY[i], z], DARK, 24).rotation.x = Math.PI / 2;
-        addBox(root, [0.46, 0.5, 0.25], [x, rollY[i], z], FRAME);
+        addBox(root, [0.32, 2.9, 0.34], [x, -0.02, z], FRAME);
+        addBox(root, [0.78, 0.18, 0.78], [x, -1.14, z], STEEL_DARK);
       }
+    }
+    for (const z of [-1.42, 1.42]) {
+      addBox(root, [5.72, 0.3, 0.34], [-0.15, 1.1, z], FRAME);
+      addBox(root, [5.72, 0.22, 0.28], [-0.15, -0.98, z], FRAME);
+    }
+    addBox(root, [0.34, 2.1, 0.3], [-2.15, 0.08, -1.42], FRAME);
+    addBox(root, [0.34, 2.1, 0.3], [2.0, 0.08, -1.42], FRAME);
+
+    // Large feed chute: the input material is intentionally exposed.
+    const feed = new THREE.Group();
+    feed.position.set(-2.05, 1.55, 0);
+    root.add(feed);
+    const feedFloor = addBox(feed, [1.65, 0.16, 1.65], [0, -0.48, 0], STEEL);
+    feedFloor.rotation.z = -0.28;
+    const feedWallA = addBox(feed, [1.7, 0.12, 0.12], [0, 0.12, -0.82], STEEL);
+    feedWallA.rotation.z = -0.28;
+    const feedWallB = addBox(feed, [1.7, 0.12, 0.12], [0, 0.12, 0.82], STEEL);
+    feedWallB.rotation.z = -0.28;
+    addBox(feed, [0.18, 0.95, 1.8], [-0.82, 0.02, 0], STEEL_DARK);
+
+    // Educational three-roll arrangement: feed roll, top roll, discharge roll.
+    const rollGroup = new THREE.Group();
+    root.add(rollGroup);
+    const rollPositions: Array<[number, number]> = [[-0.78, -0.02], [0, 0.64], [0.78, -0.02]];
+    const rolls: THREE.Mesh[] = [];
+    rollPositions.forEach(([x, y], index) => {
+      const roll = addCylinder(rollGroup, 0.62, 2.7, [x, y, 0], STEEL, 48);
+      roll.rotation.x = Math.PI / 2;
+      rolls.push(roll);
+      addRollGrooves(rollGroup, x, y, 0);
+      for (const z of [-1.37, 1.37]) {
+        addCylinder(rollGroup, 0.72, 0.07, [x, y, z], STEEL_DARK, 40).rotation.x = Math.PI / 2;
+      }
+      for (const z of [-1.53, 1.53]) {
+        addCylinder(root, 0.28, 0.28, [x, y, z], DARK_BEARING, 24).rotation.x = Math.PI / 2;
+        addBox(root, [0.5, 0.58, 0.3], [x, y, z], FRAME);
+      }
+      if (index === 1) addBox(root, [0.9, 0.7, 0.34], [x, y + 0.72, -1.42], STEEL_DARK);
     });
 
-    // Shafts extend through the bearings and connect the rolls to the drive train.
-    for (const [x, y] of rollX.map((x, i) => [x, rollY[i]] as const)) {
-      const shaft = addCylinder(root, 0.11, 3.45, [x, y, 0], DARK, 20);
+    // Shafts are visible through the bearing housings.
+    for (const [x, y] of rollPositions) {
+      const shaft = addCylinder(root, 0.13, 3.65, [x, y, 0], SHAFT, 24);
       shaft.rotation.x = Math.PI / 2;
     }
 
-    // Side drive train: motor -> coupling -> gearbox -> mill rolls.
-    addBox(root, [1.2, 0.85, 1.15], [2.55, -0.48, -1.62], DARK);
-    addBox(root, [0.72, 0.65, 0.78], [2.55, 0.25, -1.62], STEEL);
-    addCylinder(root, 0.42, 0.72, [2.55, 0.24, -1.1], COPPER, 32).rotation.x = Math.PI / 2;
-    addCylinder(root, 0.52, 0.95, [2.55, 0.24, -1.98], RUBBER, 32).rotation.x = Math.PI / 2;
-    addPipe(root, new THREE.Vector3(2.15, 0.25, -1.1), new THREE.Vector3(1.05, 0.55, -1.1), 0.08, DARK);
-    addPipe(root, new THREE.Vector3(1.05, 0.55, -1.1), new THREE.Vector3(0.2, 0.55, -1.1), 0.08, DARK);
+    // Simplified drive side. It communicates power transfer, but does not compete with the material view.
+    const drive = new THREE.Group();
+    drive.position.set(0.15, -0.08, -1.76);
+    root.add(drive);
+    addBox(drive, [1.45, 0.95, 0.95], [2.45, -0.55, 0], STEEL_DARK);
+    addCylinder(drive, 0.48, 0.72, [1.7, 0.0, 0], STEEL_DARK, 32).rotation.z = Math.PI / 2;
+    addBox(drive, [0.55, 0.7, 0.9], [2.85, -0.02, 0], FRAME);
+    addCylinder(drive, 0.3, 0.35, [3.18, -0.02, 0], COPPER, 28).rotation.z = Math.PI / 2;
+    addBox(drive, [1.25, 0.12, 0.8], [3.75, -0.68, 0], STEEL_DARK);
 
-    // Juice collection tray below the nip, with a visible outlet pipe.
-    addBox(root, [3.25, 0.12, 2.0], [0, -0.72, 0], TRAY);
-    addBox(root, [3.25, 0.2, 0.12], [0, -0.5, -0.96], STEEL);
-    addBox(root, [3.25, 0.2, 0.12], [0, -0.5, 0.96], STEEL);
-    addPipe(root, new THREE.Vector3(1.35, -0.76, 0), new THREE.Vector3(2.1, -0.76, 0), 0.09, STEEL);
-    addPipe(root, new THREE.Vector3(2.1, -0.76, 0), new THREE.Vector3(2.1, -1.18, 0), 0.09, STEEL);
-    addPipe(root, new THREE.Vector3(2.1, -1.18, 0), new THREE.Vector3(2.95, -1.18, 0), 0.09, STEEL);
+    const gearGroup = new THREE.Group();
+    drive.add(gearGroup);
+    const driveGears = [
+      addGear(gearGroup, 0.28, 14, [0.35, 0.05, 0.52], GEAR),
+      addGear(gearGroup, 0.4, 20, [0.35, 0.05, 1.12], GEAR),
+      addGear(gearGroup, 0.31, 16, [1.0, 0.05, 1.12], GEAR),
+      addGear(gearGroup, 0.43, 22, [1.62, 0.05, 1.12], GEAR),
+    ];
 
-    // Transparent inspection panels expose the compression zone without turning the whole machine into glass.
-    const frontPanel = addBox(root, [3.7, 1.95, 0.035], [0, 0.02, -1.46], GLASS);
-    frontPanel.castShadow = false;
-    addBox(root, [0.08, 2.05, 1.95], [-1.95, 0.02, 0], GLASS).castShadow = false;
-    addBox(root, [0.08, 2.05, 1.95], [1.95, 0.02, 0], GLASS).castShadow = false;
+    // Transparent guard/cutaway surface keeps the internals readable.
+    const guard = addBox(root, [2.9, 1.9, 0.06], [0.1, 0.05, -1.59], GLASS);
+    guard.castShadow = false;
 
-    // Feed material: long fibrous pieces visibly converge into the first nip.
-    const canePieces: THREE.Mesh[] = [];
-    for (let i = 0; i < 22; i++) {
-      const piece = addBox(root, [0.48, 0.075, 0.07], [-2.72 + (i % 7) * 0.17, 0.58 + (i % 3) * 0.16, -0.42 + (i % 5) * 0.21], FIBER);
-      piece.rotation.z = (i % 3 - 1) * 0.15;
-      canePieces.push(piece);
+    // Juice pan and outlet.
+    addBox(root, [3.35, 0.12, 2.2], [0, -0.78, 0], STEEL_DARK);
+    addBox(root, [3.35, 0.18, 0.12], [0, -0.54, -1.06], STEEL);
+    addBox(root, [3.35, 0.18, 0.12], [0, -0.54, 1.06], STEEL);
+    addPipe(root, new THREE.Vector3(1.35, -0.79, 0), new THREE.Vector3(2.25, -0.79, 0), 0.11, STEEL);
+    addPipe(root, new THREE.Vector3(2.25, -0.79, 0), new THREE.Vector3(2.25, -1.18, 0), 0.11, STEEL);
+    addPipe(root, new THREE.Vector3(2.25, -1.18, 0), new THREE.Vector3(3.2, -1.18, 0), 0.11, STEEL);
+    const juicePool = addBox(root, [2.85, 0.055, 1.55], [-0.15, -0.68, 0], JUICE);
+    juicePool.material.transparent = true;
+    juicePool.material.opacity = 0.86;
+
+    // Bagasse discharge chute is physically separate from the liquid outlet.
+    const bagasseChute = new THREE.Group();
+    bagasseChute.position.set(1.82, -0.03, 0);
+    root.add(bagasseChute);
+    const chuteFloor = addBox(bagasseChute, [1.45, 0.14, 1.15], [0.5, -0.45, 0], STEEL);
+    chuteFloor.rotation.z = -0.3;
+    const chuteSideA = addBox(bagasseChute, [1.5, 0.1, 0.1], [0.5, 0.0, -0.58], STEEL);
+    chuteSideA.rotation.z = -0.3;
+    const chuteSideB = addBox(bagasseChute, [1.5, 0.1, 0.1], [0.5, 0.0, 0.58], STEEL);
+    chuteSideB.rotation.z = -0.3;
+
+    type CaneParticle = { mesh: THREE.Mesh; phase: number; lane: number };
+    type FiberParticle = { mesh: THREE.Mesh; phase: number; lane: number };
+    const caneParticles: CaneParticle[] = [];
+    const fiberParticles: FiberParticle[] = [];
+    const juiceDrops: THREE.Mesh[] = [];
+    const fiberDust: THREE.Mesh[] = [];
+
+    // Cane pieces have visible segmented bodies rather than abstract cubes.
+    for (let i = 0; i < 30; i++) {
+      const cane = addCylinder(root, 0.095, 0.64 + (i % 3) * 0.12, [0, 0, 0], CANE, 12);
+      cane.rotation.z = Math.PI / 2 + ((i % 3) - 1) * 0.15;
+      for (let ring = 0; ring < 3; ring++) {
+        const node = new THREE.Mesh(new THREE.TorusGeometry(0.098, 0.012, 6, 12), CANE_LIGHT);
+        node.position.set(0, -0.18 + ring * 0.18, 0);
+        node.rotation.x = Math.PI / 2;
+        cane.add(node);
+      }
+      caneParticles.push({ mesh: cane, phase: i / 30, lane: (i % 7) / 6 });
     }
 
-    // Compressed fiber/bagasse exits the final roll.
-    const bagasse: THREE.Mesh[] = [];
-    for (let i = 0; i < 18; i++) {
-      const piece = addBox(root, [0.34, 0.06, 0.09], [1.45 + (i % 6) * 0.15, -0.05 + (i % 4) * 0.09, -0.5 + (i % 5) * 0.24], FIBER);
-      bagasse.push(piece);
+    // Fibers start thick and chaotic, then become flatter, longer bagasse ribbons after compression.
+    for (let i = 0; i < 42; i++) {
+      const fiber = addBox(root, [0.42, 0.055, 0.055], [0, 0, 0], i % 3 === 0 ? FIBER_DARK : FIBER);
+      fiberParticles.push({ mesh: fiber, phase: i / 42, lane: (i % 11) / 10 });
     }
 
-    // Juice droplets visibly leave the compression zone and fall into the collection tray.
-    const droplets: THREE.Mesh[] = [];
-    for (let i = 0; i < 28; i++) droplets.push(addCylinder(root, 0.026, 0.08, [0, 0, 0], JUICE, 10));
+    for (let i = 0; i < 46; i++) juiceDrops.push(addCylinder(root, 0.025, 0.09, [0, 0, 0], JUICE_GLOW, 10));
+    for (let i = 0; i < 18; i++) fiberDust.push(addBox(root, [0.12, 0.025, 0.025], [0, 0, 0], FIBER));
 
-    // A thin juice level makes the collected liquid readable without hiding the tray.
-    const juiceLevel = new THREE.Mesh(new THREE.BoxGeometry(2.85, 0.055, 1.55), JUICE);
-    juiceLevel.position.set(-0.15, -0.63, 0);
-    juiceLevel.material.transparent = true;
-    juiceLevel.material.opacity = 0.82;
-    root.add(juiceLevel);
-
-    // Small safety guards and handrails add scale and industrial context.
-    for (const x of [-2.8, 2.8]) {
-      addBox(root, [0.08, 1.15, 0.08], [x, 0.35, -1.65], COPPER);
-      addBox(root, [0.7, 0.08, 0.08], [x, 0.9, -1.65], COPPER);
+    // Visual flow markers point directly through the compression zone.
+    const flowArrow = new THREE.Group();
+    root.add(flowArrow);
+    for (let i = 0; i < 5; i++) {
+      const line = addBox(flowArrow, [0.3, 0.03, 0.03], [-1.25 + i * 0.42, 0.0, -1.7], COPPER);
+      line.castShadow = false;
+      const head = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.15, 8), COPPER);
+      head.rotation.z = -Math.PI / 2;
+      head.position.set(-1.07 + i * 0.42, 0.0, -1.7);
+      flowArrow.add(head);
     }
 
-    let animationId = 0;
     const clock = new THREE.Clock();
+    let frameId = 0;
     const animate = () => {
-      animationId = requestAnimationFrame(animate);
+      frameId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
+      const timeScale = slowRef.current ? 0.3 : 1;
+      const t = elapsed * timeScale;
 
-      // Counter-rotation is the key mechanical event: the rolls pull and compress the fiber between them.
-      rollMeshes.forEach((roll, i) => {
-        roll.rotation.z = elapsed * (i === 1 ? -1.65 : 1.65);
-      });
+      if (!pausedRef.current) {
+        // Coherent mechanical chain: gears and rolls move continuously.
+        const directions = [1, -1, 1, -1];
+        driveGears.forEach((gear, i) => {
+          gear.rotation.z = t * (2.5 / (i + 2)) * directions[i];
+        });
+        rolls.forEach((roll, i) => {
+          roll.rotation.z = t * (i === 1 ? -1.55 : 1.55);
+        });
 
-      canePieces.forEach((piece, i) => {
-        const cycle = (elapsed * 0.24 + i / canePieces.length) % 1;
-        piece.position.x = -2.72 + cycle * 2.0;
-        piece.position.y = 0.45 + Math.sin(cycle * Math.PI) * 0.22 + (i % 3) * 0.12;
-        piece.position.z = -0.46 + (i % 5) * 0.22;
-        piece.scale.x = 1 - Math.max(0, cycle - 0.62) * 1.4;
-      });
+        caneParticles.forEach(({ mesh, phase, lane }) => {
+          const cycle = (t * 0.18 + phase) % 1;
+          const approach = Math.min(cycle / 0.58, 1);
+          mesh.position.x = -2.95 + approach * 2.25;
+          mesh.position.z = (lane - 0.5) * 1.15;
+          mesh.position.y = 0.98 - approach * 0.78 + Math.sin(cycle * 10 + phase * 8) * 0.035;
+          const compression = Math.max(0, (cycle - 0.54) / 0.2);
+          mesh.scale.set(1 - compression * 0.45, 1, 1 - compression * 0.15);
+          mesh.rotation.y = Math.sin(t * 2 + phase * 9) * 0.16;
+        });
 
-      bagasse.forEach((piece, i) => {
-        const cycle = (elapsed * 0.2 + i / bagasse.length) % 1;
-        piece.position.x = 1.35 + cycle * 1.55;
-        piece.position.y = -0.02 - cycle * 0.2 + (i % 4) * 0.08;
-        piece.rotation.z = Math.sin(elapsed * 1.7 + i) * 0.18;
-        piece.scale.x = 0.9 + cycle * 0.35;
-      });
+        fiberParticles.forEach(({ mesh, phase, lane }) => {
+          const cycle = (t * 0.16 + phase) % 1;
+          const z = (lane - 0.5) * 1.02;
+          if (cycle < 0.46) {
+            const approach = cycle / 0.46;
+            mesh.position.set(-1.15 + approach * 1.12, 0.25 - approach * 0.3, z * (1 - approach * 0.35));
+            mesh.scale.set(0.45 + approach * 0.55, 1.2, 1);
+          } else {
+            const exit = (cycle - 0.46) / 0.54;
+            mesh.position.set(-0.03 + exit * 2.18, -0.08 - exit * 0.48, z * 1.06);
+            mesh.scale.set(0.95 + exit * 0.75, 0.95 - exit * 0.2, 1.15);
+            mesh.rotation.z = Math.sin(t * 2.2 + phase * 14) * 0.24;
+          }
+        });
 
-      droplets.forEach((drop, i) => {
-        const cycle = (elapsed * 0.52 + i / droplets.length) % 1;
-        const lane = (i % 7) / 6;
-        drop.position.x = -1.05 + lane * 2.1;
-        drop.position.z = -0.7 + ((i * 13) % 10) * 0.14;
-        drop.position.y = 0.0 - cycle * 0.82;
-        drop.scale.setScalar(0.55 + Math.sin(cycle * Math.PI) * 0.7);
-      });
+        juiceDrops.forEach((drop, i) => {
+          const cycle = (t * 0.42 + i / juiceDrops.length) % 1;
+          const x = -1.1 + (i % 9) * 0.25;
+          const z = -0.7 + ((i * 7) % 12) * 0.12;
+          drop.position.set(x, 0.04 - cycle * 0.8, z);
+          drop.scale.setScalar(0.55 + Math.sin(cycle * Math.PI) * 0.9);
+        });
 
+        fiberDust.forEach((piece, i) => {
+          const cycle = (t * 0.22 + i / fiberDust.length) % 1;
+          piece.position.set(1.0 + cycle * 1.55, -0.08 - cycle * 0.35, -0.5 + ((i * 5) % 9) * 0.12);
+          piece.rotation.z = t * (0.5 + i * 0.01);
+        });
+
+        juicePool.position.y = -0.68 + Math.sin(t * 1.1) * 0.008;
+        flowArrow.position.x = Math.sin(t * 1.6) * 0.04;
+      }
+
+      camera.position.x = baseCamera.x + (pausedRef.current ? 0 : Math.sin(t * 0.22) * 0.06);
+      camera.position.y = baseCamera.y + (pausedRef.current ? 0 : Math.sin(t * 0.16) * 0.025);
+      camera.lookAt(0.15, -0.05, 0);
       renderer.render(scene, camera);
     };
     animate();
@@ -247,7 +372,7 @@ export default function ExtractionMillV2() {
     window.addEventListener("resize", resize);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
       renderer.dispose();
       if (host.contains(renderer.domElement)) host.removeChild(renderer.domElement);
@@ -259,19 +384,40 @@ export default function ExtractionMillV2() {
       <div className="extraction-mill-v2-heading">
         <div>
           <span>REALISM BENCHMARK · EXTRACTION</span>
-          <h2>Extraction Mill V2</h2>
+          <h2>Extraction Mill · Inside the Transformation</h2>
         </div>
         <p>
-          Educational 3-roll mill model: feed enters the nip, rotating rolls compress the fiber,
-          juice falls into the collection tray, and bagasse leaves the machine.
+          A cutaway learning model: watch sugarcane enter, get squeezed between three rolls, release juice, and leave as fibrous bagasse. The equipment is simplified so the material story stays visible.
         </p>
       </div>
-      <div ref={mount} className="extraction-mill-v2-canvas" aria-label="Interactive 3D sugarcane extraction mill model" />
-      <div className="extraction-mill-v2-legend">
-        <span><i /> Feed fiber</span>
-        <span><i /> Counter-rotating rolls</span>
-        <span><i /> Extracted juice</span>
-        <span><i /> Bagasse outlet</span>
+
+      <div className="extraction-mill-v2-process">
+        <div className="extraction-step active"><b>01</b><span>CANE ENTERS</span><small>Fibrous feed</small></div>
+        <div className="extraction-step"><b>02</b><span>COMPRESSION</span><small>Cells are squeezed</small></div>
+        <div className="extraction-step"><b>03</b><span>JUICE RELEASE</span><small>Liquid leaves fiber</small></div>
+        <div className="extraction-step"><b>04</b><span>BAGASSE EXITS</span><small>Fiber stream remains</small></div>
+      </div>
+
+      <div ref={mount} className="extraction-mill-v2-canvas" aria-label="Interactive cutaway 3D sugarcane extraction mill showing cane compression, juice separation and bagasse output" />
+
+      <div className="extraction-mill-v2-info">
+        <div className="extraction-material-card">
+          <span>WHAT HAPPENS TO THE MATERIAL?</span>
+          <strong>SUGARCANE → JUICE + BAGASSE</strong>
+          <p><b>Separates:</b> liquid sugarcane juice from the solid fibrous structure.</p>
+          <p><b>Combines:</b> nothing is intentionally added in this unit. The key operation is mechanical separation by compression.</p>
+        </div>
+        <div className="extraction-output-card">
+          <span>VISIBLE OUTPUT STREAMS</span>
+          <div><i className="juice-dot" /><b>Sugarcane juice</b><small>→ clarification</small></div>
+          <div><i className="fiber-dot" /><b>Bagasse</b><small>→ fibrous solid</small></div>
+        </div>
+      </div>
+
+      <div className="extraction-mill-v2-controls">
+        <button type="button" onClick={() => setPaused((value) => !value)}>{paused ? "▶ RESUME" : "Ⅱ PAUSE"}</button>
+        <button type="button" className={slow ? "selected" : ""} onClick={() => setSlow((value) => !value)}>◷ {slow ? "NORMAL SPEED" : "SLOW MOTION"}</button>
+        <span>Material-first animation · the machine motion supports the process story</span>
       </div>
     </section>
   );
