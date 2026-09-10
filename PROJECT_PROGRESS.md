@@ -64,10 +64,11 @@ Process logic must remain testable without a renderer.
 - Kept the complete production line visible as the primary overview instead of making camera-tour navigation the primary interaction.
 - Added an original equipment inspection experience with stage-specific internal procedural views and educational observation/output panels.
 - Added an immersive factory-overview frame with industrial grid, ambient glow, live-model HUD, process metrics, and visual legend around the production line.
+- Rebuilt the factory overview animation as an explicitly process-teaching layer: rotating rollers/cutters/shafts, moving cane/fiber, visible juice drops, settling solids, boiling bubbles, rising vapor, crystal growth, centrifuge rotation/separation, drying airflow, and continuous material movement between stages.
 
 ### In Progress
 
-- Manual browser verification of direct equipment selection, selected-equipment information, and View Details → internal inspection → Back to plant flow.
+- Manual browser verification of the new process animation and direct equipment selection.
 - Improve equipment-specific material-flow behavior after visual review.
 - Review simplified educational assumptions before presenting them as UI data.
 - Improve the visual transition between plant overview and equipment inspection without making the overview camera the primary interaction.
@@ -157,6 +158,7 @@ Material streams support component composition so later stages can represent jui
 - [x] Process legend / interaction guidance
 - [x] Complete production-line overview
 - [x] Immersive factory presentation frame
+- [x] First process-teaching animation pass for all eight units
 - [ ] Equipment-specific flow visualization refinement
 - [ ] Simulation state timeline visualization
 
