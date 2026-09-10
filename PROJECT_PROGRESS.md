@@ -64,18 +64,17 @@ Process logic must remain testable without a renderer.
 - Added an original equipment inspection experience with stage-specific internal procedural views and educational observation/output panels.
 - Added an immersive factory-overview frame with industrial grid, ambient glow, live-model HUD, process metrics, and visual legend around the production line.
 - Added a guided factory tour control that steps through the eight process stations automatically.
+- Added smooth in-scene camera travel so selecting a station changes the viewpoint inside the existing Three.js scene instead of rebuilding the scene.
 
 ### In Progress
 
 - Manual browser verification of the immersive plant presentation, guided tour, and station interaction.
-- Replace the current station-to-station rebuild transition with smooth camera travel inside the same Three.js scene.
 - Build a spatial cutaway path from the selected plant unit into the existing internal equipment inspection experience.
 - Improve equipment-specific material-flow behavior after visual review.
 - Review simplified educational assumptions before presenting them as UI data.
 
 ### Not Yet Implemented
 
-- Smooth in-scene camera travel / focus transition.
 - Cutaway integrated into the main plant camera experience.
 - Complete engineering parameter dataset.
 - Engineering validation beyond domain-level checks.
@@ -159,7 +158,7 @@ Material streams support component composition so later stages can represent jui
 - [x] Complete production-line overview
 - [x] Immersive factory presentation frame
 - [x] Guided factory tour
-- [ ] Smooth camera focus/travel
+- [x] Smooth camera focus/travel
 - [ ] Equipment-specific flow visualization refinement
 - [ ] Simulation state timeline visualization
 
