@@ -65,11 +65,15 @@ Process logic must remain testable without a renderer.
 - Added an original equipment inspection experience with stage-specific internal procedural views and educational observation/output panels.
 - Added an immersive factory-overview frame with industrial grid, ambient glow, live-model HUD, process metrics, and visual legend around the production line.
 - Rebuilt the factory overview animation as an explicitly process-teaching layer: rotating rollers/cutters/shafts, moving cane/fiber, visible juice drops, settling solids, boiling bubbles, rising vapor, crystal growth, centrifuge rotation/separation, drying airflow, and continuous material movement between stages.
+- Added a standalone original `ExtractionMillV2` procedural model as the realism benchmark for equipment reconstruction.
+- The Extraction Mill V2 benchmark uses a machine assembly rather than abstract primitives alone: structural frame, bearing supports, three-roll compression mechanism, shafts, feed chute, drive train, gearbox/motor representation, collection tray, juice outlet, safety elements, selective transparent inspection panels, fiber feed, bagasse discharge, and visible juice droplets.
+- Added explicit counter-rotation and material-motion animation to the Extraction Mill V2 benchmark so the mechanical action and material transformation can be understood visually.
 
 ### In Progress
 
-- Manual browser verification of the new process animation and direct equipment selection.
-- Improve equipment-specific material-flow behavior after visual review.
+- Manual browser verification of Extraction Mill V2 realism and animation.
+- Integrate the Extraction Mill V2 visual standard into the main factory overview and selected-equipment inspection flow.
+- Refine equipment-specific material-flow behavior after the Extraction Mill benchmark is visually accepted.
 - Review simplified educational assumptions before presenting them as UI data.
 - Improve the visual transition between plant overview and equipment inspection without making the overview camera the primary interaction.
 
@@ -159,7 +163,9 @@ Material streams support component composition so later stages can represent jui
 - [x] Complete production-line overview
 - [x] Immersive factory presentation frame
 - [x] First process-teaching animation pass for all eight units
+- [x] Extraction Mill V2 realism benchmark
 - [ ] Equipment-specific flow visualization refinement
+- [ ] Integrate Extraction Mill V2 into the main factory overview
 - [ ] Simulation state timeline visualization
 
 ### Inspection
@@ -171,6 +177,7 @@ Material streams support component composition so later stages can represent jui
 - [ ] Smooth visual transition into inspection
 - [ ] Cutaway integrated into main plant camera experience
 - [ ] Educational component highlighting inside equipment
+- [ ] Extraction Mill V2 internal inspection integration
 
 ### Simulation
 
