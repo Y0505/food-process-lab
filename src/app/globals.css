@@ -7,7 +7,9 @@ body {
 }
 
 body {
-  background: #071014;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(53, 117, 126, 0.2), transparent 38%),
+    #071014;
   color: #e8f0f2;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -17,4 +19,112 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+.process-shell {
+  position: relative;
+  overflow: hidden;
+  min-height: 500px;
+  border: 1px solid rgba(169, 204, 209, 0.16);
+  border-radius: 22px;
+  background: #050d11;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34), inset 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.process-canvas,
+.process-canvas canvas {
+  display: block;
+  width: 100%;
+}
+
+.process-panel {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: min(340px, calc(100% - 36px));
+  padding: 18px;
+  border: 1px solid rgba(181, 218, 223, 0.2);
+  border-radius: 16px;
+  background: rgba(5, 14, 18, 0.78);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.process-kicker {
+  font-size: 10px;
+  letter-spacing: 1.7px;
+  color: #8ebec4;
+}
+
+.process-panel h2 {
+  margin: 8px 0 6px;
+  font-size: 22px;
+}
+
+.process-panel p {
+  margin: 0 0 14px;
+  color: rgba(232, 240, 242, 0.7);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.process-data {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 7px 10px;
+  font-size: 11px;
+}
+
+.process-data span {
+  color: rgba(232, 240, 242, 0.48);
+}
+
+.process-data strong {
+  overflow-wrap: anywhere;
+  font-weight: 500;
+  color: #d9e9eb;
+}
+
+.process-status {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(181, 218, 223, 0.14);
+  border-radius: 999px;
+  background: rgba(5, 14, 18, 0.7);
+  color: rgba(232, 240, 242, 0.62);
+  font-size: 10px;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(8px);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #74d5c1;
+  box-shadow: 0 0 12px rgba(116, 213, 193, 0.9);
+}
+
+@media (max-width: 760px) {
+  .process-panel {
+    width: min(300px, calc(100% - 28px));
+    top: 14px;
+    left: 14px;
+    padding: 14px;
+  }
+
+  .process-panel h2 {
+    font-size: 19px;
+  }
+
+  .process-status {
+    right: 12px;
+    bottom: 12px;
+    font-size: 9px;
+  }
 }
