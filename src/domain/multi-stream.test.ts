@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { componentMassFlow, componentFractionsSum, type MaterialStream } from "./material";
-import { assertMassBalance, splitStreamByMassFraction } from "./multi-stream";
+import {
+  assertMassBalance,
+  splitStreamByComponentRecovery,
+  splitStreamByMassFraction,
+} from "./multi-stream";
 import { sugarcaneExtractionMultiStream } from "../processes/sugarcane-multi-stream";
 
 const feed: MaterialStream = {
@@ -34,17 +38,49 @@ describe("multi-stream transformations", () => {
     expect(() => assertMassBalance([feed], outputs)).not.toThrow();
   });
 
-  it("models extraction as juice plus bagasse without losing mass", () => {
+  it("allocates each component between juice and bagasse while conserving component mass", () => {
+    const [juice, bagasse] = splitStreamByComponentRecovery(
+      feed,
+      ["juice", "bagasse"],
+      new Map([
+        ["water", 0.75],
+        ["sucrose", 0.9],
+        ["fiber", 0.3],
+        ["other-solids", 0.325],
+      ]),
+    );
+
+    expect(juice.massFlowKgPerHour).toBeCloseTo(700);
+    expect(bagasse.massFlowKgPerHour).toBeCloseTo(300);
+    expect(componentMassFlow(juice, "sucrose")).toBeCloseTo(126);
+    expect(componentMassFlow(bagasse, "sucrose")).toBeCloseTo(14);
+    expect(componentFractionsSum(juice.components)).toBeCloseTo(1);
+    expect(componentFractionsSum(bagasse.components)).toBeCloseTo(1);
+
+    for (const component of feed.components) {
+      const outputMass =
+        componentMassFlow(juice, component.id) + componentMassFlow(bagasse, component.id);
+      expect(outputMass).toBeCloseTo(componentMassFlow(feed, component.id));
+    }
+  });
+
+  it("models extraction with different juice and bagasse composition", () => {
     const result = sugarcaneExtractionMultiStream([feed], {
       stepId: "extraction",
-      parameters: new Map([["juice-yield", 70]]),
+      parameters: new Map([
+        ["juice-yield", 70],
+        ["water-to-juice-percent", 75],
+        ["sucrose-to-juice-percent", 90],
+        ["fiber-to-juice-percent", 30],
+        ["other-solids-to-juice-percent", 32.5],
+      ]),
     });
 
-    expect(result.outputs).toHaveLength(2);
-    expect(result.outputs[0].id).toBe("extracted-juice");
-    expect(result.outputs[1].id).toBe("bagasse");
-    expect(result.outputs[0].massFlowKgPerHour).toBeCloseTo(700);
-    expect(result.outputs[1].massFlowKgPerHour).toBeCloseTo(300);
+    const [juice, bagasse] = result.outputs;
+    expect(juice.massFlowKgPerHour).toBeCloseTo(700);
+    expect(bagasse.massFlowKgPerHour).toBeCloseTo(300);
+    expect(componentMassFlow(juice, "fiber")).toBeCloseTo(36);
+    expect(componentMassFlow(bagasse, "fiber")).toBeCloseTo(84);
     expect(() => assertMassBalance([feed], result.outputs)).not.toThrow();
   });
 });
