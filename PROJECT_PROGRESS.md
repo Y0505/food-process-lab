@@ -23,76 +23,40 @@ This file is the shared source of truth for project progress, architectural deci
 
 Process logic must remain testable without a renderer.
 
-```text
-UI
- ├── 3D Visualization
- │   ├── Scene
- │   ├── Equipment
- │   ├── Material Flow
- │   └── Interaction
- ├── Process Engine
- │   ├── Process Steps
- │   ├── Material State
- │   ├── Parameters
- │   ├── Transformations
- │   └── Validation
- └── Educational Data
-     ├── Explanations
-     ├── Equipment Information
-     └── Technical References
-```
-
 ## Current Status
 
 **Phase:** 2 — Process Engine Vertical Slice
 
 ### Completed
 
-- Repository created: `Y0505/food-process-lab`
-- English-first project direction established.
-- Process-first concept established.
-- Originality/copyright policy established.
-- Dependency policy established.
-- README and project coordination file added.
-- Next.js + TypeScript application foundation added.
-- Direct Three.js viewport added without a 3D framework wrapper.
-- Initial process-domain contracts added.
-- Sugarcane-to-sugar process definition added.
-- Process definition drives the initial visual equipment units.
-- Deterministic material transformation primitives added.
-- Material-state validation added.
-- Deterministic process runner added.
-- Sugarcane transformation registry added.
-- A simulation API endpoint now executes the complete process path.
-- No extra test runner dependency was introduced merely for tests; a temporary Vitest test was removed because Vitest is not installed.
+- Repository and documentation foundation.
+- Next.js + TypeScript application foundation.
+- Direct Three.js viewport.
+- Initial process-domain contracts.
+- Sugarcane-to-sugar process definition.
+- Deterministic transformation and validation foundation.
+- Multi-component material stream model.
+- Material-stream composition validation.
+- Explicitly illustrative sugarcane feed stream.
 
 ### In Progress
 
-- Replace illustrative transformation values with researched, explicitly sourced engineering parameters.
-- Improve material composition/state representation so mass is not incorrectly treated as a single homogeneous stream.
-- Connect simulation results to the 3D experience.
+- Multi-stream transformation contract.
+- Mass-balance-preserving extraction slice.
+- Test suite for the domain layer.
 
 ### Not Yet Implemented
 
 - Complete engineering parameter dataset.
 - Equipment-specific original visual representations.
-- Equipment selection and parameter panels.
 - Internal/cutaway inspection.
-- Simulation timeline and user-controlled parameters.
-- Rigorous mass/energy balances.
+- Simulation timeline.
+- Engineering validation beyond domain-level checks.
 - Production polish/deployment.
-
-## Important Modeling Note
-
-The current transformations are intentionally educational placeholders. They demonstrate the architecture and deterministic execution path; their illustrative percentages must not be interpreted as plant design values or validated process yields.
-
-In particular, the current runner preserves a single `materialId` and applies simplified flow changes. A future material model must represent multiple streams/components before claiming engineering-grade mass balance behavior.
 
 ## Initial Process
 
 `Sugarcane → Preparation → Size Reduction / Shredding → Juice Extraction → Juice Clarification → Evaporation → Crystallization → Centrifugation → Drying → Sugar`
-
-The first implementation should not attempt to model every machine component. Detail is added only when it improves understanding of the process.
 
 ## Domain Model Direction
 
@@ -102,11 +66,13 @@ Core concepts:
 - `ProcessStep`
 - `Equipment`
 - `MaterialState`
+- `MaterialStream`
+- `MaterialComponent`
 - `Parameter`
 - `Transformation`
 - `ProcessConnection`
 
-A process step must be able to describe its input stream, output stream, equipment, relevant parameters, and deterministic transformation without depending on Three.js.
+Material streams support component composition so later stages can represent juice, fiber/bagasse, water, sucrose, and other components without making the renderer the source of truth.
 
 ## Development Checklist
 
@@ -121,25 +87,27 @@ A process step must be able to describe its input stream, output stream, equipme
 
 - [x] Domain types
 - [x] Material state
+- [x] Material stream composition
 - [x] Process-step contract
 - [x] Deterministic transformation interface
-- [x] Validation contract
+- [x] Basic validation contract
+- [ ] Multi-stream transformation contract
+- [ ] Mass-balance validation
 - [ ] Unit tests with an approved test runner
-- [x] Deterministic process runner
 
 ### First Process
 
 - [x] Sugarcane process-stage skeleton
-- [x] Initial sugarcane input state
-- [x] Preparation transformation contract
-- [x] Size reduction / shredding transformation
-- [x] Juice extraction transformation
-- [x] Juice clarification transformation
-- [x] Evaporation transformation
-- [x] Crystallization transformation
-- [x] Centrifugation transformation
-- [x] Drying transformation
-- [ ] Engineering-grade sugar output calculation
+- [x] Illustrative sugarcane input stream
+- [ ] Preparation transformation
+- [ ] Size reduction / shredding transformation
+- [ ] Juice extraction transformation
+- [ ] Juice clarification transformation
+- [ ] Evaporation transformation
+- [ ] Crystallization transformation
+- [ ] Centrifugation transformation
+- [ ] Drying transformation
+- [ ] Sugar output stream
 
 ### Visualization
 
@@ -160,11 +128,11 @@ A process step must be able to describe its input stream, output stream, equipme
 
 ### Simulation
 
-- [x] Deterministic execution
-- [ ] Simulation state model beyond a single stream
+- [x] Deterministic execution foundation
+- [ ] Multi-stream simulation state
 - [ ] Simulation clock/timeline
 - [ ] Parameter input
-- [x] Input/output reporting endpoint
+- [ ] Input/output reporting for multi-stream state
 - [ ] Mass balance validation
 - [ ] Energy balance validation
 
@@ -183,15 +151,7 @@ Technical research may be used to understand food-processing terminology, proces
 
 Research must not be used as a source for copying implementation, distinctive interface design, assets, or product-specific workflows.
 
-For important engineering parameters, record:
-
-- parameter name;
-- value or range;
-- unit;
-- process context;
-- assumptions;
-- source;
-- date checked when useful.
+For important engineering parameters, record parameter name, value/range, unit, process context, assumptions, source, and date checked when useful.
 
 If a reliable value is not yet established, mark it as unknown, configurable, or illustrative.
 
@@ -223,22 +183,18 @@ No additional dependency should be added without a corresponding license decisio
 2. Record important architecture decisions.
 3. Record new dependencies and their license checks.
 4. Record blockers and unresolved engineering questions.
-5. Verify the result before claiming completion.
+5. Do not claim completion until the result has been checked.
 
 ## Current Next Task
 
-Research and formalize the material-state model before adding more process realism. The next model should distinguish at least the major conceptual streams/components needed for sugarcane extraction and concentration, while keeping the simulation deterministic and independently testable.
+Implement the multi-stream transformation contract and a small mass-balance-preserving extraction slice. Then add tests for composition validation, component mass flow, transformation execution, and balance behavior. **When this test suite is ready to run, stop and ask Yaser to test it before continuing.**
 
 ## Change Log
 
 ### 2026-09-10
 
-- Confirmed repository write access.
-- Added and verified foundation documentation.
-- Added executable deterministic transformations.
-- Added material-state validation.
-- Added deterministic process runner.
-- Added sugarcane transformation registry.
-- Added a simulation API endpoint.
-- Removed a temporary test file rather than introducing an unapproved test dependency.
-- Updated project status to Phase 2.
+- Added multi-component material stream model.
+- Added material-stream validation.
+- Added explicitly illustrative sugarcane feed composition.
+- Kept engineering-mode claims separate from educational placeholder values.
+- Next milestone is a testable multi-stream process slice.
