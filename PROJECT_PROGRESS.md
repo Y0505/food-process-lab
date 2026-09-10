@@ -25,7 +25,7 @@ Process logic must remain testable without a renderer.
 
 ## Current Status
 
-**Phase:** 4 — Process visualization integration / procedural visual polish
+**Phase:** 4 — Process visualization integration / procedural visual polish / station interaction
 
 ### Completed
 
@@ -56,21 +56,25 @@ Process logic must remain testable without a renderer.
 - Replaced uniform equipment boxes with original procedural equipment forms tailored to the eight process stages.
 - Added procedural labels, industrial floor/grid, shadows, fog, lighting, particles, and tone mapping for a richer learning-oriented scene.
 - Removed the deprecated `THREE.Clock` usage in favor of `THREE.Timer`.
+- Added substantially denser procedural equipment detail: supports, flanges, valve wheels, stems, gauges, internal shafts, coils, transfer pipe runs, and stage-specific subassemblies.
+- Added clickable equipment/stage selection so the active process station can be inspected from the viewport or stage strip.
+- Added a process-stage control strip, process legend, and visible station parameters in the overlay.
+- Added differentiated animated material particles in the process lanes in addition to the main flow markers.
 
 ### In Progress
 
-- Manual browser verification of the richer procedural visualization.
+- Manual browser verification of the denser procedural plant and station interaction.
 - Improve equipment-specific material-flow behavior after visual review.
 - Review simplified educational assumptions before presenting them as UI data.
 
 ### Not Yet Implemented
 
-- Equipment selection.
-- Parameter display/input.
-- Simulation timeline.
+- Camera focus/inspection mode.
 - Internal/cutaway inspection.
 - Complete engineering parameter dataset.
 - Engineering validation beyond domain-level checks.
+- Simulation timeline controls.
+- Parameter editing.
 - Production polish/deployment.
 
 ## Initial Process
@@ -142,9 +146,12 @@ Material streams support component composition so later stages can represent jui
 - [x] Active stage highlighting
 - [x] Live process-state overlay
 - [x] Procedural visual polish (lighting, shadows, grid, fog, particles, labels)
-- [ ] Equipment selection
+- [x] Dense stage-specific procedural equipment detail
+- [x] Equipment/stage selection
+- [x] Visible stage parameters
+- [x] Process legend / interaction guidance
+- [ ] Camera focus/inspection mode
 - [ ] Equipment-specific flow visualization
-- [ ] Parameter display
 - [ ] Simulation state timeline visualization
 
 ### Inspection
@@ -178,70 +185,3 @@ Material streams support component composition so later stages can represent jui
 Technical research may be used to understand food-processing terminology, process stages, engineering equations and relationships, standards, safety concepts, and realistic parameter ranges.
 
 Research must not be used as a source for copying implementation, distinctive interface design, assets, or product-specific workflows.
-
-For important engineering parameters, record parameter name, value/range, unit, process context, assumptions, source, and date checked when useful.
-
-If a reliable value is not yet established, mark it as unknown, configurable, or illustrative.
-
-## Dependency Decision Log
-
-| Dependency | Version | Purpose | License | Free? | Visible attribution required? | Decision |
-|---|---|---|---|---|---|---|
-| Next.js | 16.3.4 | Application framework | MIT | Yes | None identified in initial review | Approved |
-| React | 19.2.8 | UI runtime | MIT | Yes | None identified in initial review | Approved |
-| React DOM | 19.2.8 | UI renderer | MIT | Yes | None identified in initial review | Approved |
-| Three.js | 0.186.0 | 3D rendering | MIT | Yes | None identified in initial review | Approved |
-| TypeScript | 7.0.2 | Type system/compiler | Apache-2.0 | Yes | None identified in initial review | Approved |
-| Vitest | 4.1.11 | Domain test runner | MIT | Yes | None identified in initial review | Approved |
-| Vite | 6.4.1 | Vitest integration/build support | MIT | Yes | None identified in initial review | Approved |
-
-Vitest is used only for development tests and does not affect user-facing application output. Vite is a development dependency used to support the Vitest setup; it is not the application's production bundler.
-
-No additional dependency should be added without a corresponding license decision.
-
-## Agent Handoff Protocol
-
-### Before Editing
-
-1. Read this file and `AGENTS.md`.
-2. Inspect the current repository state.
-3. Check whether the requested task is already complete.
-4. Preserve existing architecture unless there is a documented reason to change it.
-5. Make the smallest coherent change that advances the project.
-
-### After Editing
-
-1. Update the checklist.
-2. Record important architecture decisions.
-3. Record new dependencies and their license checks.
-4. Record blockers and unresolved engineering questions.
-5. Do not claim completion until the result has been checked.
-
-## Current Next Task
-
-**Testing gate:** run the latest browser build locally after pulling the procedural visualization changes. Verify the richer scene, then report any visual or console issue before the next equipment-interaction slice.
-
-After successful browser verification, implement equipment selection and inspection-oriented interaction without moving process logic into the renderer.
-
-## Change Log
-
-### 2026-09-10
-
-- Added multi-component material stream model and validation.
-- Added explicitly illustrative sugarcane feed composition.
-- Added multi-stream transformation contract and mass-balance helpers.
-- Added Vitest and the first executable domain tests.
-- Corrected the test setup to Vitest 4.1.11 + Vite 6.4.1 for the project's Node 20 environment.
-- Added component-aware stream allocation with explicit per-component recovery inputs.
-- Updated sugarcane extraction to use component recoveries and verify configured juice yield.
-- Added a multi-stream process runner that validates each step's streams and records simulation history.
-- Added runner tests for step-to-step stream propagation and missing transformations.
-- Added end-to-end sugarcane multi-stream transformations for clarification, evaporation, crystallization, centrifugation, and drying.
-- Added complete-process tests and stage mass-balance checks.
-- Fixed component-derived stream moisture so it is calculated from the output water mass fraction rather than inherited from the original input stream.
-- Added `AGENTS.md` as a compact AI-agent handoff guide.
-- Added `sugarcane-visualization-model.ts` to keep simulation-to-renderer mapping pure and testable.
-- Added visualization-model tests.
-- Connected simulation state to the Three.js viewport with active-stage highlighting and animated flow markers.
-- Rebuilt the viewport equipment as original procedural forms with richer lighting, shadows, fog, grid, particles, labels, and tone mapping.
-- Replaced deprecated `THREE.Clock` usage with `THREE.Timer`.
