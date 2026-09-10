@@ -44,7 +44,7 @@ UI
 
 ## Current Status
 
-**Phase:** 1 — Application Skeleton / Process Vertical Slice
+**Phase:** 2 — Process Engine Vertical Slice
 
 ### Completed
 
@@ -53,29 +53,40 @@ UI
 - Process-first concept established.
 - Originality/copyright policy established.
 - Dependency policy established.
-- README added.
-- Project coordination/progress file added.
-- Next.js application shell added.
-- TypeScript configuration added.
-- Three.js viewport added without a 3D framework wrapper.
+- README and project coordination file added.
+- Next.js + TypeScript application foundation added.
+- Direct Three.js viewport added without a 3D framework wrapper.
 - Initial process-domain contracts added.
-- Initial sugarcane-to-sugar process definition added.
-- Process definition is used as the source for the initial 3D equipment units.
-- Core dependencies were license-reviewed: Next.js MIT, React MIT, Three.js MIT, TypeScript Apache-2.0. No visible attribution requirement was identified for normal application use in this initial review.
+- Sugarcane-to-sugar process definition added.
+- Process definition drives the initial visual equipment units.
+- Deterministic material transformation primitives added.
+- Material-state validation added.
+- Deterministic process runner added.
+- Sugarcane transformation registry added.
+- A simulation API endpoint now executes the complete process path.
+- No extra test runner dependency was introduced merely for tests; a temporary Vitest test was removed because Vitest is not installed.
 
 ### In Progress
 
-- Strengthening the process-domain model.
-- Making material transformations executable and testable.
-- Replacing placeholder visual units with process-specific original equipment representations.
+- Replace illustrative transformation values with researched, explicitly sourced engineering parameters.
+- Improve material composition/state representation so mass is not incorrectly treated as a single homogeneous stream.
+- Connect simulation results to the 3D experience.
 
 ### Not Yet Implemented
 
 - Complete engineering parameter dataset.
+- Equipment-specific original visual representations.
+- Equipment selection and parameter panels.
 - Internal/cutaway inspection.
-- Simulation timeline and deterministic execution.
-- Engineering validation and balances.
+- Simulation timeline and user-controlled parameters.
+- Rigorous mass/energy balances.
 - Production polish/deployment.
+
+## Important Modeling Note
+
+The current transformations are intentionally educational placeholders. They demonstrate the architecture and deterministic execution path; their illustrative percentages must not be interpreted as plant design values or validated process yields.
+
+In particular, the current runner preserves a single `materialId` and applies simplified flow changes. A future material model must represent multiple streams/components before claiming engineering-grade mass balance behavior.
 
 ## Initial Process
 
@@ -112,22 +123,23 @@ A process step must be able to describe its input stream, output stream, equipme
 - [x] Material state
 - [x] Process-step contract
 - [x] Deterministic transformation interface
-- [ ] Validation contract
-- [ ] Unit tests
+- [x] Validation contract
+- [ ] Unit tests with an approved test runner
+- [x] Deterministic process runner
 
 ### First Process
 
-- [ ] Sugarcane input
-- [x] Process-stage skeleton
-- [ ] Preparation transformation
-- [ ] Size reduction / shredding transformation
-- [ ] Juice extraction transformation
-- [ ] Juice clarification transformation
-- [ ] Evaporation transformation
-- [ ] Crystallization transformation
-- [ ] Centrifugation transformation
-- [ ] Drying transformation
-- [ ] Sugar output
+- [x] Sugarcane process-stage skeleton
+- [x] Initial sugarcane input state
+- [x] Preparation transformation contract
+- [x] Size reduction / shredding transformation
+- [x] Juice extraction transformation
+- [x] Juice clarification transformation
+- [x] Evaporation transformation
+- [x] Crystallization transformation
+- [x] Centrifugation transformation
+- [x] Drying transformation
+- [ ] Engineering-grade sugar output calculation
 
 ### Visualization
 
@@ -137,6 +149,7 @@ A process step must be able to describe its input stream, output stream, equipme
 - [ ] Equipment selection
 - [ ] Material-flow visualization
 - [ ] Parameter display
+- [ ] Simulation state visualization
 
 ### Inspection
 
@@ -147,12 +160,13 @@ A process step must be able to describe its input stream, output stream, equipme
 
 ### Simulation
 
-- [ ] Simulation state
+- [x] Deterministic execution
+- [ ] Simulation state model beyond a single stream
 - [ ] Simulation clock/timeline
 - [ ] Parameter input
-- [ ] Deterministic execution
-- [ ] Input/output reporting
-- [ ] Balance validation
+- [x] Input/output reporting endpoint
+- [ ] Mass balance validation
+- [ ] Energy balance validation
 
 ### Quality
 
@@ -213,17 +227,18 @@ No additional dependency should be added without a corresponding license decisio
 
 ## Current Next Task
 
-Implement executable material transformations and validation for the first vertical slice, beginning with a deliberately small and traceable material state. Do not add invented engineering values merely to make the demo look more realistic.
+Research and formalize the material-state model before adding more process realism. The next model should distinguish at least the major conceptual streams/components needed for sugarcane extraction and concentration, while keeping the simulation deterministic and independently testable.
 
 ## Change Log
 
 ### 2026-09-10
 
-- Repository write access confirmed.
-- Added README and project coordination document.
-- Added minimal Next.js + TypeScript foundation.
-- Added direct Three.js integration.
-- Added process-domain contracts.
-- Added initial sugarcane process definition.
-- Connected process data to the initial 3D scene.
-- Verified current core package versions and licenses before updating the dependency manifest.
+- Confirmed repository write access.
+- Added and verified foundation documentation.
+- Added executable deterministic transformations.
+- Added material-state validation.
+- Added deterministic process runner.
+- Added sugarcane transformation registry.
+- Added a simulation API endpoint.
+- Removed a temporary test file rather than introducing an unapproved test dependency.
+- Updated project status to Phase 2.
