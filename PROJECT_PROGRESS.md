@@ -40,15 +40,17 @@ Process logic must remain testable without a renderer.
 - Explicitly illustrative sugarcane feed stream.
 - Multi-stream transformation contract.
 - Mass-balance helpers.
-- Previous executable domain test gate passed locally with 3 tests.
 - Component-aware stream allocation primitive with explicit per-component recovery inputs.
-- Sugarcane extraction now exposes explicit component recovery assumptions.
+- Sugarcane extraction with explicit component recovery assumptions.
 - Multi-stream process runner foundation.
+- Complete sugarcane multi-stream transformation registry covering all eight process stages.
+- Stage-level mass-balance assertions for active split operations.
+- End-to-end multi-stream process test covering cane through dried sugar.
 
 ### In Progress
 
-- Expanding multi-stream execution from extraction into the complete sugarcane process without inventing unverified engineering behavior.
-- Local verification of the newly added component-aware extraction and runner tests.
+- Local verification of the complete sugarcane multi-stream process.
+- Review of the simplified educational assumptions before connecting the process state to the 3D visualization.
 
 ### Not Yet Implemented
 
@@ -101,20 +103,21 @@ Material streams support component composition so later stages can represent jui
 - [x] Unit tests with an approved test runner
 - [x] Component-aware two-output allocation
 - [x] Multi-stream process runner foundation
+- [x] End-to-end sugarcane multi-stream execution
 
 ### First Process
 
 - [x] Sugarcane process-stage skeleton
 - [x] Illustrative sugarcane input stream
-- [ ] Preparation transformation
-- [ ] Size reduction / shredding transformation
+- [x] Preparation transformation — structural pass-through pending engineering parameterization
+- [x] Size reduction / shredding transformation — structural pass-through pending engineering parameterization
 - [x] Juice extraction transformation — component-aware educational slice
-- [ ] Juice clarification transformation
-- [ ] Evaporation transformation
-- [ ] Crystallization transformation
-- [ ] Centrifugation transformation
-- [ ] Drying transformation
-- [ ] Sugar output stream
+- [x] Juice clarification transformation — simplified suspended-solids split
+- [x] Evaporation transformation — configurable water split
+- [x] Crystallization transformation — temperature/state transition only; phase-specific model remains future work
+- [x] Centrifugation transformation — explicit component recovery split
+- [x] Drying transformation — target-moisture water removal
+- [x] Sugar output stream
 
 ### Visualization
 
@@ -198,7 +201,7 @@ No additional dependency should be added without a corresponding license decisio
 
 ## Current Next Task
 
-**Verification gate:** pull the latest commits and run the expanded domain test suite. If it passes, continue with the next process-engine slice. If it fails, fix the domain issue before adding UI work.
+**Verification gate:** pull the latest commits and run `npm test`. If the complete sugarcane multi-stream tests pass, the next slice is to connect the resulting process state to the existing Three.js equipment/flow visualization. If it fails, fix the domain issue before adding UI work.
 
 ## Change Log
 
@@ -213,4 +216,5 @@ No additional dependency should be added without a corresponding license decisio
 - Updated sugarcane extraction to use component recoveries and verify configured juice yield.
 - Added a multi-stream process runner that validates each step's streams and records simulation history.
 - Added runner tests for step-to-step stream propagation and missing transformations.
-- Previous 3-test gate passed; the expanded test set still needs local verification.
+- Added end-to-end sugarcane multi-stream transformations for clarification, evaporation, crystallization state, centrifugation, and drying.
+- Added complete-process tests and stage mass-balance checks.
