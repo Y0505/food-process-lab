@@ -25,7 +25,7 @@ Process logic must remain testable without a renderer.
 
 ## Current Status
 
-**Phase:** 2 — Process Engine Vertical Slice
+**Phase:** 2 — Process Engine Vertical Slice → Phase 4 visualization integration
 
 ### Completed
 
@@ -46,19 +46,26 @@ Process logic must remain testable without a renderer.
 - Complete sugarcane multi-stream transformation registry covering all eight process stages.
 - Stage-level mass-balance assertions for active split operations.
 - End-to-end multi-stream process test covering cane through dried sugar.
+- Fixed derived-stream moisture to use output water composition.
+- Added an AI-oriented `AGENTS.md` handoff file.
+- Added a pure visualization-model adapter that maps deterministic simulation state to process stages.
+- Added tests for visualization-model mapping and stream-state exposure.
 
 ### In Progress
 
-- Fix verification issue where derived multi-stream moisture was inherited from the original feed instead of the output component composition.
-- Local verification of the complete sugarcane multi-stream process after the fix.
-- Review of the simplified educational assumptions before connecting the process state to the 3D visualization.
+- Verify the new visualization-model adapter locally.
+- Connect deterministic process state to the existing Three.js viewport.
+- Review simplified educational assumptions before presenting them as UI data.
 
 ### Not Yet Implemented
 
-- Complete engineering parameter dataset.
-- Equipment-specific original visual representations.
-- Internal/cutaway inspection.
+- Equipment-specific original visual representations beyond the current primitives.
+- Equipment selection.
+- Material-flow visualization/animation.
+- Parameter display/input.
 - Simulation timeline.
+- Internal/cutaway inspection.
+- Complete engineering parameter dataset.
 - Engineering validation beyond domain-level checks.
 - Production polish/deployment.
 
@@ -88,6 +95,7 @@ Material streams support component composition so later stages can represent jui
 
 - [x] README
 - [x] Project progress / agent coordination
+- [x] AI agent handoff guide
 - [x] Dependency policy
 - [x] Application scaffold
 
@@ -125,10 +133,11 @@ Material streams support component composition so later stages can represent jui
 - [x] Original 3D scene
 - [x] Original primitive equipment representations
 - [x] Connect equipment to process data
+- [x] Pure visualization-model adapter for simulation state
 - [ ] Equipment selection
 - [ ] Material-flow visualization
 - [ ] Parameter display
-- [ ] Simulation state visualization
+- [ ] Simulation state visualization in the viewport
 
 ### Inspection
 
@@ -172,7 +181,7 @@ If a reliable value is not yet established, mark it as unknown, configurable, or
 |---|---|---|---|---|---|---|
 | Next.js | 16.3.4 | Application framework | MIT | Yes | None identified in initial review | Approved |
 | React | 19.2.8 | UI runtime | MIT | Yes | None identified in initial review | Approved |
-| React DOM | 19.2.8 | Web renderer | MIT | Yes | None identified in initial review | Approved |
+| React DOM | 19.2.8 | UI renderer | MIT | Yes | None identified in initial review | Approved |
 | Three.js | 0.186.0 | 3D rendering | MIT | Yes | None identified in initial review | Approved |
 | TypeScript | 7.0.2 | Type system/compiler | Apache-2.0 | Yes | None identified in initial review | Approved |
 | Vitest | 4.1.11 | Domain test runner | MIT | Yes | None identified in initial review | Approved |
@@ -186,7 +195,7 @@ No additional dependency should be added without a corresponding license decisio
 
 ### Before Editing
 
-1. Read this file.
+1. Read this file and `AGENTS.md`.
 2. Inspect the current repository state.
 3. Check whether the requested task is already complete.
 4. Preserve existing architecture unless there is a documented reason to change it.
@@ -202,7 +211,9 @@ No additional dependency should be added without a corresponding license decisio
 
 ## Current Next Task
 
-**Verification gate:** pull the latest fix and run `npm test`. The reported failure was caused by `moisturePercent` remaining inherited from the original feed on component-derived output streams; the stream builder now derives moisture from the output water component mass fraction. If all tests pass, the next slice is to connect the resulting process state to the existing Three.js equipment/flow visualization. If it fails, fix the domain issue before adding UI work.
+**Testing gate:** pull the latest commits and run `npm test`. This verifies the new pure visualization-model adapter before the browser/Three.js integration is considered ready for manual UI testing.
+
+After the test gate passes, connect `buildSugarcaneVisualizationModel()` to the existing `ProcessViewport` without moving process logic into the renderer. Then add a small, readable process-state panel or overlay and map stage state to the corresponding 3D equipment.
 
 ## Change Log
 
@@ -220,3 +231,6 @@ No additional dependency should be added without a corresponding license decisio
 - Added end-to-end sugarcane multi-stream transformations for clarification, evaporation, crystallization, centrifugation, and drying.
 - Added complete-process tests and stage mass-balance checks.
 - Fixed component-derived stream moisture so it is calculated from the output water mass fraction rather than inherited from the original input stream.
+- Added `AGENTS.md` as a compact AI-agent handoff guide.
+- Added `sugarcane-visualization-model.ts` to keep simulation-to-renderer mapping pure and testable.
+- Added visualization-model tests.
