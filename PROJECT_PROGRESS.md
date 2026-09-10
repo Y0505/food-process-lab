@@ -66,15 +66,20 @@ Process logic must remain testable without a renderer.
 - Added an immersive factory-overview frame with industrial grid, ambient glow, live-model HUD, process metrics, and visual legend around the production line.
 - Rebuilt the factory overview animation as an explicitly process-teaching layer: rotating rollers/cutters/shafts, moving cane/fiber, visible juice drops, settling solids, boiling bubbles, rising vapor, crystal growth, centrifuge rotation/separation, drying airflow, and continuous material movement between stages.
 - Added a standalone original `ExtractionMillV2` procedural model as the realism benchmark for equipment reconstruction.
-- The Extraction Mill V2 benchmark uses a machine assembly rather than abstract primitives alone: structural frame, bearing supports, three-roll compression mechanism, shafts, feed chute, drive train, gearbox/motor representation, collection tray, juice outlet, safety elements, selective transparent inspection panels, fiber feed, bagasse discharge, and visible juice droplets.
-- Added explicit counter-rotation and material-motion animation to the Extraction Mill V2 benchmark so the mechanical action and material transformation can be understood visually.
+- Rebuilt `ExtractionMillV2` from scratch around the educational cutaway target rather than adding more decorative geometry to the previous model.
+- The rebuilt Extraction Mill uses a simplified industrial three-roll arrangement with feed chute, heavy frame, shafts, bearing housings, visible drive side, procedural gear train, selective transparent guard, juice pan/outlet and separate bagasse chute.
+- Reworked material visualization so segmented sugarcane enters the machine, fibers compress through the nip, juice visibly separates downward as droplets, and the remaining fiber stream exits as bagasse.
+- Added a material-first explanation panel: `SUGARCANE → JUICE + BAGASSE`, with explicit separation and combination statements.
+- Added process-step HUD for feed → compression → juice release → bagasse exit.
+- Added Pause and Slow Motion controls so the transformation can be inspected at a useful educational speed.
+- Kept the rebuild dependency-free beyond the already-approved Three.js stack; no external 3D asset or attribution-bearing visual library was introduced.
 
 ### In Progress
 
-- Manual browser verification of Extraction Mill V2 realism and animation.
-- Integrate the Extraction Mill V2 visual standard into the main factory overview and selected-equipment inspection flow.
-- Refine equipment-specific material-flow behavior after the Extraction Mill benchmark is visually accepted.
-- Review simplified educational assumptions before presenting them as UI data.
+- Manual browser verification of the rebuilt Extraction Mill V2 visual composition and animation.
+- Integrate the accepted Extraction Mill visual standard into the main selected-equipment inspection flow.
+- Refine equipment-specific material-flow behavior after visual verification.
+- Review simplified educational assumptions before presenting them as engineering data.
 - Improve the visual transition between plant overview and equipment inspection without making the overview camera the primary interaction.
 
 ### Not Yet Implemented
@@ -164,6 +169,7 @@ Material streams support component composition so later stages can represent jui
 - [x] Immersive factory presentation frame
 - [x] First process-teaching animation pass for all eight units
 - [x] Extraction Mill V2 realism benchmark
+- [x] Material-first Extraction Mill V2 cutaway rebuild
 - [ ] Equipment-specific flow visualization refinement
 - [ ] Integrate Extraction Mill V2 into the main factory overview
 - [ ] Simulation state timeline visualization
