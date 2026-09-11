@@ -1,7 +1,7 @@
 import FactoryOverviewFrame from "@/components/factory-overview-frame";
 import ProcessLineOverview from "@/components/process-line-overview";
 import ProcessExplorer from "@/components/process-explorer";
-import ExtractionMillV2 from "@/components/extraction-mill-v2";
+import ExtractionMillV3 from "@/components/extraction-mill-v3";
 import ProcessExplorerStyles from "@/components/process-explorer-styles";
 
 export default function HomePage() {
@@ -53,7 +53,7 @@ export default function HomePage() {
         <FactoryOverviewFrame>
           <ProcessLineOverview />
         </FactoryOverviewFrame>
-        <ExtractionMillV2 />
+        <ExtractionMillV3 />
         <ProcessExplorer />
       </div>
     </main>
