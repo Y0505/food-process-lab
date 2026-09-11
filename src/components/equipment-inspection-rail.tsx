@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { getEquipmentInspection, sugarcaneEquipmentInspections } from "@/domain/equipment-inspection";
 
@@ -52,7 +53,7 @@ export function EquipmentInspectionRail() {
           <small>{definition.cutawayPurpose}</small>
           <div className="inspection-schematic" aria-hidden="true">
             {definition.components.map((component, index) => (
-              <div className="inspection-node" key={component.id} style={{ "--node": index } as React.CSSProperties}>
+              <div className="inspection-node" key={component.id} style={{ "--node": index } as CSSProperties}>
                 <i />
                 <span>{component.label}</span>
               </div>
