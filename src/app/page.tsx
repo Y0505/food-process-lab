@@ -1,5 +1,16 @@
 import { ImmersiveSugarPlant } from "@/components/immersive-sugar-plant-v2";
 
+const processMap = [
+  ["01", "Cane preparation", "Whole cane", "Prepared billets", "Cut & align"],
+  ["02", "Shredding", "Billets", "Opened fiber", "Break cell structure"],
+  ["03", "Juice extraction", "Shredded cane", "Juice + bagasse", "Press & separate"],
+  ["04", "Clarification", "Raw juice", "Clear juice", "Settle solids"],
+  ["05", "Evaporation", "Clear juice", "Syrup", "Remove water"],
+  ["06", "Crystallization", "Syrup", "Massecuite", "Grow crystals"],
+  ["07", "Centrifugation", "Massecuite", "Sugar + molasses", "Separate phases"],
+  ["08", "Sugar drying", "Wet sugar", "Dry sugar", "Reduce moisture"],
+] as const;
+
 export default function HomePage() {
   return (
     <main className="food-process-app">
@@ -29,11 +40,34 @@ export default function HomePage() {
         .unit-flow{display:grid;grid-template-columns:1fr 22px 1fr;align-items:center;gap:8px;margin:14px 0}.unit-flow div{min-width:0;padding:9px;border:1px solid rgba(157,202,201,.1);border-radius:9px;background:rgba(255,255,255,.025)}.unit-flow small{display:block;color:rgba(225,239,238,.32);font-size:7px;letter-spacing:1px}.unit-flow strong{display:block;margin-top:4px;color:rgba(235,246,244,.78);font-size:9px;line-height:1.3}.unit-flow>span{text-align:center;color:#6fd0bc}
         .unit-panel button{width:100%;border:1px solid rgba(112,208,190,.55);border-radius:9px;padding:11px 13px;background:#11433f;color:#eafff9;cursor:pointer;font-size:9px;font-weight:800;letter-spacing:.7px}.unit-panel button:hover{background:#175951}.unit-panel button.secondary{background:rgba(255,255,255,.035);border-color:rgba(157,202,201,.2)}
         .inside-badge{position:absolute;left:42px;top:104px;padding:12px 15px;border:1px solid rgba(112,208,190,.27);border-radius:11px;background:rgba(3,13,16,.72);backdrop-filter:blur(10px);pointer-events:none;z-index:4}.inside-badge span{display:block;color:#70d0bd;font-size:7px;letter-spacing:1.5px;font-weight:800}.inside-badge strong{display:block;margin-top:4px;font-size:15px}.inside-badge small{display:block;margin-top:4px;color:rgba(225,239,238,.38);font-size:8px}
+        .process-map{margin:30px 12px 0;padding:26px;border:1px solid rgba(157,202,201,.1);border-radius:22px;background:linear-gradient(180deg,rgba(9,24,27,.78),rgba(3,11,14,.88));box-shadow:0 22px 70px rgba(0,0,0,.2)}
+        .process-map-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:18px}.process-map-kicker{color:#70d0bd;font-size:8px;font-weight:800;letter-spacing:1.8px}.process-map h2{margin:7px 0 0;font-size:22px;letter-spacing:-.5px}.process-map-head p{max-width:460px;margin:0;color:rgba(226,239,238,.38);font-size:10px;line-height:1.5;text-align:right}
+        .process-grid{display:grid;grid-template-columns:repeat(8,minmax(125px,1fr));gap:8px;overflow-x:auto;padding-bottom:4px}.process-card{position:relative;min-width:125px;padding:13px 12px 14px;border:1px solid rgba(157,202,201,.09);border-radius:13px;background:rgba(255,255,255,.025)}.process-card:not(:last-child)::after{content:"";position:absolute;right:-7px;top:50%;width:6px;height:1px;background:rgba(112,208,190,.35)}.process-no{color:#70d0bd;font-size:8px;font-weight:800;letter-spacing:1px}.process-card strong{display:block;margin-top:8px;font-size:11px;line-height:1.25}.process-transform{display:inline-block;margin-top:8px;padding:4px 6px;border-radius:5px;background:rgba(112,208,190,.08);color:#9ddbd0;font-size:7px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}.process-io{margin-top:11px;color:rgba(226,239,238,.34);font-size:7px;line-height:1.45}.process-io b{color:rgba(235,246,244,.64);font-weight:600}
         @keyframes plantPulse{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
-        @media(max-width:850px){.immersive-plant-top{align-items:flex-start;flex-direction:column}.plant-status{margin-top:0}.plant-viewport{height:680px;min-height:0}.plant-intro-card{left:18px;bottom:72px;width:290px}.unit-panel{right:18px;bottom:72px;width:calc(100% - 36px)}.inside-badge{left:18px;top:92px}}
-        @media(max-width:560px){.immersive-plant{padding:18px 10px 28px}.immersive-plant-top{padding:6px 7px 14px}.immersive-plant h1{font-size:34px}.immersive-plant-top p{font-size:11px}.plant-viewport{height:590px;border-radius:19px}.plant-hint{gap:6px;font-size:7px;letter-spacing:.7px}.plant-hint b{font-size:10px}.plant-intro-card{display:none}.unit-panel{right:10px;bottom:56px;width:calc(100% - 20px);padding:14px}.unit-panel h2{font-size:19px}.unit-flow{margin:10px 0}.inside-badge{left:10px;top:72px;max-width:calc(100% - 20px)}}
+        @media(max-width:1100px){.process-grid{grid-template-columns:repeat(8,minmax(150px,1fr))}}
+        @media(max-width:850px){.immersive-plant-top{align-items:flex-start;flex-direction:column}.plant-status{margin-top:0}.plant-viewport{height:680px;min-height:0}.plant-intro-card{left:18px;bottom:72px;width:290px}.unit-panel{right:18px;bottom:72px;width:calc(100% - 36px)}.inside-badge{left:18px;top:92px}.process-map{margin:24px 0 0;padding:20px}.process-map-head{align-items:flex-start;flex-direction:column}.process-map-head p{text-align:left}.process-grid{overflow-x:auto}}
+        @media(max-width:560px){.immersive-plant{padding:18px 10px 28px}.immersive-plant-top{padding:6px 7px 14px}.immersive-plant h1{font-size:34px}.immersive-plant-top p{font-size:11px}.plant-viewport{height:590px;border-radius:19px}.plant-hint{gap:6px;font-size:7px;letter-spacing:.7px}.plant-hint b{font-size:10px}.plant-intro-card{display:none}.unit-panel{right:10px;bottom:56px;width:calc(100% - 20px);padding:14px}.unit-panel h2{font-size:19px}.unit-flow{margin:10px 0}.inside-badge{left:10px;top:72px;max-width:calc(100% - 20px)}.process-map{border-radius:17px;padding:16px}.process-map h2{font-size:19px}}
       ` }} />
       <ImmersiveSugarPlant />
+      <section className="process-map" aria-label="Sugar production process map">
+        <div className="process-map-head">
+          <div>
+            <span className="process-map-kicker">PROCESS TRACE · 08 STAGES</span>
+            <h2>From cane to sugar</h2>
+          </div>
+          <p>Follow the material itself: every unit changes what enters it, and the next unit receives that transformed material.</p>
+        </div>
+        <div className="process-grid">
+          {processMap.map(([no, name, input, output, transform]) => (
+            <article className="process-card" key={no}>
+              <span className="process-no">{no}</span>
+              <strong>{name}</strong>
+              <span className="process-transform">{transform}</span>
+              <div className="process-io"><b>IN</b> · {input}<br /><b>OUT</b> · {output}</div>
+            </article>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
