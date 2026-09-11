@@ -1,85 +1,101 @@
 # FoodProcessLab — Visual Quality Specification
 
-The project is being built as a portfolio-grade interactive 3D learning environment, not as a collection of placeholder primitives.
+FoodProcessLab is being built as a portfolio-grade interactive 3D learning environment. The final experience should feel like entering a real sugar-processing plant, not browsing separate demo cards.
 
-## Target quality bar
+## Primary experience
 
-A viewer should be able to understand the main physical transformation from the 3D scene before reading the explanatory text.
+The application has one dominant interaction model:
 
-### Equipment
+`Factory floor → select machine → camera approaches machine → enter machine → inspect internal mechanism → return to factory`
 
-Every important machine should have, where relevant:
+The production line is the home screen. Separate long-form machine demo sections are not the primary navigation.
 
-- recognisable industrial proportions
-- structural frame and load-bearing parts
-- shafts, bearings and couplings
-- guards or cutaway windows that reveal the learning-critical mechanism
-- pipes, flanges, valves and outlets where they explain flow
-- fasteners, seams, ribs, supports or maintenance details where they improve scale/readability
-- material-specific surfaces rather than one flat material for everything
-- lighting and shadows that make depth and contact points obvious
+## Factory floor quality bar
 
-### Process visualization
+The first screen should immediately communicate **industrial sugar factory**:
 
-The model must show the transformation itself:
+- continuous production hall rather than isolated floating machines
+- structural columns, roof trusses, catwalks and maintenance platforms
+- conveyors and inter-unit process piping
+- utility headers and service lines
+- coherent floor, scale and spatial depth
+- atmospheric lighting, contact shadows and restrained post-processing
+- visible material movement connecting the units
+- eight identifiable process units with meaningful silhouettes
 
-- input material enters visibly
-- the relevant physical interaction occurs inside the machine
-- intermediate material states are visible
-- output streams leave through distinct paths
-- animation speed is tied to the educational goal, not merely decorative motion
+A user should understand that the machines belong to one connected process before reading text.
 
-### Materials
+## Machine interaction
 
-Use a restrained PBR-oriented material hierarchy:
+Every process unit is directly selectable in the 3D scene.
 
-- painted/aged industrial steel
-- polished shafts
-- rubber/contact surfaces
-- brass/bronze service components
-- process-specific food material
-- transparent guards only where the transparency teaches something
+Selection should:
 
-External CC0 PBR textures may be introduced when procedural materials stop being convincing. The asset and license must be recorded before shipping.
+1. highlight the chosen unit;
+2. move the camera toward it;
+3. expose concise input/output/process information;
+4. provide an explicit **Enter Machine** action;
+5. move into a closer cutaway/internal inspection;
+6. preserve orbit and zoom so the user can inspect the mechanism;
+7. provide a clear return to the factory.
 
-### Rendering
+## Internal machine quality bar
 
-The visual stack may use:
+The internal view must be process-first. Primitive geometry is acceptable only when it represents a recognizable real component.
 
-- Three.js addons already shipped with the approved Three.js dependency
-- React Three Fiber / drei when a declarative architecture materially improves the scene
-- postprocessing when subtle effects improve depth, contrast or emissive process signals
-- self-hosted, license-verified HDRIs/PBR assets
-- glTF/glb assets after license review and optimization
+Where relevant, equipment should contain:
 
-Effects must remain subordinate to the educational model. Bloom, fog, glow and cinematic grading must never hide geometry or make a process ambiguous.
+- load-bearing frame and casing
+- shafts, bearings, couplings and drives
+- rollers, rotors, blades, coils, baskets, drums or agitators appropriate to the stage
+- guards and cutaway surfaces
+- pipes, flanges, valves and outlets
+- fasteners, ribs, supports and maintenance details where they improve scale
+- distinct material states
+- visible input and output paths
+- animation showing the physical transformation
 
-## Current benchmark
+The viewer should be able to answer **“what is happening to the material?”** by looking at the model before reading the UI.
 
-`ExtractionMillV3` is the current visual benchmark.
+## Process visualization
 
-It introduces:
+Every stage should expose a meaningful transformation:
 
-- rounded industrial geometry rather than only sharp boxes
-- detailed three-roll compression assembly
-- bearing housings and service fittings
-- visible gear train and motor/fan assembly
-- cutaway guard
-- flanged product outlet
-- separate juice and bagasse paths
-- segmented sugarcane input
-- compressed fiber output
-- visible juice droplets/jets
-- subtle post-processing bloom
-- interactive orbit inspection
-- pause and slow-motion inspection
+`input material → physical/thermal/mechanical interaction → intermediate state → output stream`
 
-## What comes next
+Examples:
 
-The benchmark is not the final factory. Once visually verified, its quality principles should be propagated selectively to the other process units.
+- Preparation: stalks become prepared billets.
+- Shredding: billets are opened into fibrous material.
+- Extraction: rolls compress cane; liquid juice separates from fiber.
+- Clarification: suspended material settles while clarified juice leaves separately.
+- Evaporation: water is removed as vapor and syrup concentration rises.
+- Crystallization: sucrose crystals grow inside concentrated liquor.
+- Centrifugation: crystals and mother liquor separate through rotation.
+- Drying: wet sugar loses moisture in a moving heated-air environment.
 
-The goal is not to make every machine equally dense. The goal is to spend geometry and rendering budget where it increases process understanding.
+Engineering values that are not yet validated must remain explicitly illustrative/configurable.
+
+## Rendering stack
+
+The project may use:
+
+- Three.js and its official addons already included with the approved Three.js dependency
+- React Three Fiber / drei if they materially improve maintainability or interaction quality
+- postprocessing for restrained bloom, tone and depth cues
+- self-hosted CC0 HDRIs/PBR materials
+- optimized glTF/GLB assets after exact license verification
+
+No visual dependency is accepted merely because it is popular or free to download. License compatibility, redistribution rights, attribution requirements and commercial use must be checked first.
+
+Poly Haven is an approved candidate for environmental HDRIs, PBR materials and selected generic industrial assets because its published assets are CC0 and may be used commercially and redistributed; exact assets still need to be recorded in `ASSET_LICENSES.md`. citehttps://polyhaven.com/license
+
+## Current implementation direction
+
+`ImmersiveSugarPlant` is now the primary application shell. It replaces the previous stacked-demo layout with one continuous factory experience and direct machine selection.
+
+The current procedural machine set covers all eight stages and includes stage-specific mechanisms rather than one generic machine shape. The next visual work is to deepen these interiors, add validated/approved external PBR assets where they materially improve realism, and make camera transitions feel like physically entering the selected unit.
 
 ## Originality rule
 
-External technical references and open assets may inform implementation, but FoodProcessLab must not copy another product's distinctive machine design, interface, animation choreography or visual identity.
+External technical references and open assets may inform implementation, but FoodProcessLab must not copy another product's distinctive machine design, interface, animation choreography or visual identity. External assets are recorded with their exact source and license.
