@@ -56,7 +56,7 @@ function pipe(g: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3, r: number, 
 function disc(g: THREE.Object3D, r: number, depth: number, p: [number, number, number], m: THREE.Material) {
   const o = cyl(g, r, depth, p, m, 48); o.rotation.x = Math.PI / 2; return o;
 }
-function tag(o: THREE.Object3D, id: string) { o.userData.stageId = id; o.traverse(c => { c.userData.stageId = id; }); return o; }
+function tag(o: Machine, id: string): Machine { o.userData.stageId = id; o.traverse(c => { c.userData.stageId = id; }); return o; }
 function addRailing(g: THREE.Object3D, x: number, z: number, w: number) {
   box(g, [w, 0.06, 0.06], [x, 1.7, z], brass); box(g, [w, 0.06, 0.06], [x, 1.15, z], brass);
   box(g, [0.06, 0.7, 0.06], [x - w / 2, 1.4, z], brass); box(g, [0.06, 0.7, 0.06], [x + w / 2, 1.4, z], brass);
@@ -124,64 +124,54 @@ function buildMachine(stage: Stage, x: number, z: number): Machine {
     for (let i = 0; i < 36; i++) { const c = sphere(root, 0.035, [Math.sin(i * 2.2) * 0.68, -0.05 + (i % 9) * 0.07, Math.cos(i * 1.6) * 0.68], sugar); c.scale.setScalar(0.5 + (i % 4) * 0.2); }
   } else if (stage.id === "centrifugation") {
     box(root, [2.2, 1.65, 1.9], [0, 0, 0], frame);
-    const basket = new THREE.Group(); basket.position.set(0, -0.15, 0); root.add(basket);
-    const shell = disc(basket, 0.82, 1.45, [0, 0, 0], steel); shell.rotation.x = Math.PI / 2;
-    const inner = disc(basket, 0.66, 1.3, [0, 0, 0], darkSteel); inner.rotation.x = Math.PI / 2;
-    for (let i = 0; i < 28; i++) { const hole = sphere(basket, 0.035, [0, 0, 0], edge); const a = (i / 28) * Math.PI * 2; const r = 0.68; hole.position.set(Math.cos(a) * r, -0.55 + (i % 5) * 0.27, Math.sin(a) * r); }
-    for (let i = 0; i < 25; i++) { const c = sphere(basket, 0.04, [Math.sin(i) * 0.5, -0.3 + (i % 8) * 0.08, Math.cos(i * 1.3) * 0.5], sugar); }
-    pipe(root, new THREE.Vector3(0, -1.0, 0), new THREE.Vector3(1.25, -1.0, 0), 0.07, steel);
+    const basket = new THREE.Group(); basket.position.set(0, 0, 0); root.add(basket);
+    cyl(basket, 0.8, 1.1, [0, 0, 0], edge, 48);
+    for (let i = 0; i < 32; i++) { const hole = cyl(basket, 0.018, 1.12, [Math.sin(i * 0.7) * 0.68, 0, Math.cos(i * 0.7) * 0.68], darkSteel, 8); hole.rotation.z = Math.PI / 2; }
+    for (let i = 0; i < 24; i++) sphere(basket, 0.04, [Math.sin(i * 1.7) * 0.58, -0.3 + (i % 6) * 0.11, Math.cos(i * 1.2) * 0.58], sugar);
+    pipe(root, new THREE.Vector3(-1.2, 0.2, 0), new THREE.Vector3(-0.78, 0.2, 0), 0.07, brass);
   } else if (stage.id === "drying") {
-    const drum = new THREE.Group(); drum.position.set(0, -0.05, 0); root.add(drum);
-    const shell = cyl(drum, 0.82, 2.15, [0, 0, 0], steel, 48); shell.rotation.z = Math.PI / 2;
-    for (let i = 0; i < 12; i++) { const rib = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.035, 8, 48), brass); rib.rotation.y = Math.PI / 2; rib.position.x = -0.85 + i * 0.16; drum.add(rib); }
-    const inside = cyl(drum, 0.68, 1.95, [0, 0, 0], darkSteel, 40); inside.rotation.z = Math.PI / 2;
-    for (let i = 0; i < 40; i++) { const c = sphere(drum, 0.04, [0, -0.4 + (i % 10) * 0.08, -0.45 + (i % 8) * 0.12], sugar); }
-    pipe(root, new THREE.Vector3(-1.4, 0.7, 0), new THREE.Vector3(-0.7, 0.35, 0), 0.08, steel);
+    const drum = new THREE.Group(); drum.rotation.z = Math.PI / 2; drum.position.set(0, 0, 0); root.add(drum);
+    cyl(drum, 0.75, 2.3, [0, 0, 0], steel, 48);
+    for (let i = 0; i < 7; i++) { const rib = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.045, 8, 48), edge); rib.position.y = -1.0 + i * 0.33; drum.add(rib); }
+    for (let i = 0; i < 28; i++) sphere(drum, 0.04, [-0.8 + (i % 8) * 0.22, -0.55 + (i % 4) * 0.28, Math.sin(i) * 0.35], sugar);
+    pipe(root, new THREE.Vector3(-1.4, 0.7, 0), new THREE.Vector3(1.4, 0.7, 0), 0.07, steel);
   }
 
-  // Every unit gets recognizable maintenance/detail language.
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2; const bolt = cyl(root, 0.045, 0.08, [Math.cos(a) * 1.25, -1.08, Math.sin(a) * 0.78], edge, 10); bolt.rotation.x = Math.PI / 2;
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2;
+    sphere(root, 0.045, [Math.cos(a) * 1.25, 0.95, Math.sin(a) * 0.9], edge);
   }
   return root;
 }
 
-export default function ImmersiveSugarPlant() {
+export function ImmersiveSugarPlant() {
   const mount = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [inside, setInside] = useState(false);
   const selectedRef = useRef<string | null>(null);
   const insideRef = useRef(false);
-
   useEffect(() => { selectedRef.current = selected; }, [selected]);
   useEffect(() => { insideRef.current = inside; }, [inside]);
 
   useEffect(() => {
-    if (!mount.current) return;
-    const host = mount.current;
-    const scene = new THREE.Scene(); scene.background = new THREE.Color(0x02080b); scene.fog = new THREE.Fog(0x02080b, 12, 32);
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100); camera.position.set(0, 7.2, 18);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" }); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08; host.appendChild(renderer.domElement);
-    const composer = new EffectComposer(renderer); composer.addPass(new RenderPass(scene, camera)); const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.62, 0.65, 0.86); composer.addPass(bloom); composer.addPass(new OutputPass());
-    const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.055; controls.enablePan = false; controls.minDistance = 2.8; controls.maxDistance = 28; controls.maxPolarAngle = Math.PI * 0.49; controls.target.set(0, 0, 0);
-
-    scene.add(new THREE.HemisphereLight(0xe9f8f3, 0x071012, 2.0));
-    const key = new THREE.DirectionalLight(0xffdfbd, 4.6); key.position.set(4, 11, 7); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.camera.near = 1; key.shadow.camera.far = 40; key.shadow.camera.left = -20; key.shadow.camera.right = 20; key.shadow.camera.top = 15; key.shadow.camera.bottom = -10; scene.add(key);
-    const teal = new THREE.PointLight(0x4fd4b8, 2.0, 18); teal.position.set(0, 4, 3); scene.add(teal);
-    const warm = new THREE.PointLight(0xff9b58, 1.3, 16); warm.position.set(10, 2, -5); scene.add(warm);
-
+    const host = mount.current; if (!host) return;
+    const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0a1011); scene.fog = new THREE.Fog(0x0a1011, 16, 42);
+    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100); camera.position.set(0, 7.2, 18);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" }); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.outputColorSpace = THREE.SRGBColorSpace; host.appendChild(renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.minDistance = 3; controls.maxDistance = 28; controls.target.set(0, 0, 0);
+    scene.add(new THREE.HemisphereLight(0xb9d8d4, 0x111617, 1.4)); const key = new THREE.DirectionalLight(0xfff0d0, 3.4); key.position.set(8, 12, 7); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); scene.add(key);
+    const fill = new THREE.PointLight(0x5ed6c0, 18, 18); fill.position.set(0, 4.5, 0); scene.add(fill);
+    const composer = new EffectComposer(renderer); composer.addPass(new RenderPass(scene, camera)); const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.48, 0.65, 0.72); composer.addPass(bloom); composer.addPass(new OutputPass());
     const world = new THREE.Group(); scene.add(world);
-    box(world, [25, 0.3, 13], [0, -1.55, 0], rubber);
+
     box(world, [24, 0.16, 12], [0, -1.36, 0], new THREE.MeshStandardMaterial({ color: 0x182326, roughness: 0.84, metalness: 0.18 }));
     for (let x = -11; x <= 11; x += 4) { box(world, [0.16, 8, 0.16], [x, 2.35, -5.4], frame); box(world, [0.16, 8, 0.16], [x, 2.35, 5.4], frame); box(world, [0.16, 8, 0.16], [x, 2.35, 0], frame); }
     for (let x = -12; x <= 12; x += 4) { box(world, [3.9, 0.16, 0.16], [x + 1.8, 6.2, -5.4], steel); box(world, [3.9, 0.16, 0.16], [x + 1.8, 6.2, 5.4], steel); }
     for (let z = -4; z <= 4; z += 2) { pipe(world, new THREE.Vector3(-12, 4.8, z), new THREE.Vector3(12, 4.8, z), 0.055, darkSteel); }
-    // Main process utility headers.
     pipe(world, new THREE.Vector3(-12, 5.3, -4.3), new THREE.Vector3(12, 5.3, -4.3), 0.13, steel);
     pipe(world, new THREE.Vector3(-12, 4.75, -4.0), new THREE.Vector3(12, 4.75, -4.0), 0.085, brass);
     pipe(world, new THREE.Vector3(-12, 4.2, -3.7), new THREE.Vector3(12, 4.2, -3.7), 0.06, darkSteel);
 
-    // Conveyor and material route.
     box(world, [23, 0.12, 0.92], [0, -0.88, 0], darkSteel);
     for (let x = -10.8; x <= 10.8; x += 0.48) { const r = disc(world, 0.18, 0.84, [x, -0.78, 0], edge); r.rotation.x = Math.PI / 2; }
     for (let x = -10.2; x <= 10.2; x += 1.8) box(world, [0.08, 0.42, 1.1], [x, -0.55, 0], frame);
@@ -190,13 +180,11 @@ export default function ImmersiveSugarPlant() {
     const xs = [-9.6, -7.0, -4.4, -1.5, 1.5, 4.3, 7.0, 9.6];
     stages.forEach((s, i) => { const m = tag(buildMachine(s, xs[i], 0), s.id); machines.set(s.id, m); world.add(m); });
 
-    // Inter-unit process piping and overhead utility drops.
     for (let i = 0; i < xs.length - 1; i++) {
       pipe(world, new THREE.Vector3(xs[i] + 1.4, -0.25, -0.92), new THREE.Vector3(xs[i + 1] - 1.4, -0.25, -0.92), 0.045, brass);
       pipe(world, new THREE.Vector3(xs[i] + 1.3, 2.8, 1.5), new THREE.Vector3(xs[i + 1] - 1.3, 2.8, 1.5), 0.055, steel);
     }
 
-    // Animated material particles make the factory read as a process, not a static diorama.
     const particles: { o: THREE.Object3D; lane: number; phase: number; kind: string }[] = [];
     for (let i = 0; i < 80; i++) { const o = sphere(world, 0.045, [0, 0, 0], i % 3 ? juice : cane); particles.push({ o, lane: i % 7, phase: i / 80, kind: i < 32 ? "cane" : i < 58 ? "juice" : "sugar" }); }
 
