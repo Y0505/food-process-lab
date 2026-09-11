@@ -31,7 +31,9 @@ The rule is now:
 
 ### Preferred external asset source: Poly Haven
 
-Poly Haven states that its HDRIs, textures and 3D models are released under CC0 and may be used commercially without required attribution. citehttps://polyhaven.com/license
+Poly Haven states that its HDRIs, textures and 3D models are released under CC0 and may be used commercially without required attribution.
+
+Source: https://polyhaven.com/license
 
 When Poly Haven assets are used:
 
