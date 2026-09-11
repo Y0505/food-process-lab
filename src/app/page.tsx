@@ -1,4 +1,4 @@
-import ImmersiveSugarPlant from "@/components/immersive-sugar-plant";
+import { ImmersiveSugarPlant } from "@/components/immersive-sugar-plant";
 
 export default function HomePage() {
   return (
