@@ -17,5 +17,10 @@
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/components/immersive-sugar-plant-v3.tsx",
+    "src/components/immersive-sugar-plant-v5.tsx",
+    "src/components/immersive-sugar-plant-v6.tsx"
+  ]
 }
