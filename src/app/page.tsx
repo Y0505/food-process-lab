@@ -1,11 +1,11 @@
-import { ImmersiveSugarPlant } from "@/components/immersive-sugar-plant-v4";
+import { ImmersiveSugarPlant } from "@/components/immersive-sugar-plant-v3";
 
 const processMap = [
   ["01", "Cane preparation", "Whole cane", "Prepared billets", "Cut & align"],
   ["02", "Shredding", "Billets", "Opened fiber", "Break cell structure"],
   ["03", "Juice extraction", "Shredded cane", "Juice + bagasse", "Press & separate"],
-  ["04", "Clarification", "Raw juice", "Clear juice", "Settle solids"],
-  ["05", "Evaporation", "Clear juice", "Syrup", "Remove water"],
+  ["04", "Clarification", "Raw juice", "Clarified juice", "Settle solids"],
+  ["05", "Evaporation", "Clarified juice", "Syrup", "Remove water"],
   ["06", "Crystallization", "Syrup", "Massecuite", "Grow crystals"],
   ["07", "Centrifugation", "Massecuite", "Sugar + molasses", "Separate phases"],
   ["08", "Sugar drying", "Wet sugar", "Dry sugar", "Reduce moisture"],
