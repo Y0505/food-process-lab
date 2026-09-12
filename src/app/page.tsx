@@ -1,4 +1,4 @@
-import { ImmersiveSugarPlant } from "@/components/immersive-sugar-plant-v3";
+import { ImmersiveSugarPlant } from "@/components/immersive-sugar-plant-v6";
 
 const processMap = [
   ["01", "Cane preparation", "Whole cane", "Prepared billets", "Cut & align"],
